@@ -68,7 +68,7 @@ sec_df$NO3N <- as.numeric(as.character(sec_df$NO3N))
 sec_df <- sec_df[-c(87612), ] # to be improved as row position dependant
 
 # Remove ratios that were computed in Excel to recompute them in R
-sec_df <- select(sec_df, -c(DOC_NO3, DOC_DON, DOC_PO4, DIN_PO4))
+sec_df <- dplyr::select(sec_df, -c(DOC_NO3, DOC_DON, DOC_PO4, DIN_PO4))
 
 # write temp file and read it back in to fix the numerical fields
 write.csv(sec_df, fixed_file, row.names = FALSE, fileEncoding = "UTF-8", quote = TRUE)
