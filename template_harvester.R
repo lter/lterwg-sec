@@ -8,7 +8,7 @@ library(lubridate)
 #TIMB works
 #Problem with Fin
 setwd("/Users/celine/Desktop/Templates_updated_26OCT2017")
-xls_file <- list.files("/Users/celine/Desktop/Templates_updated_26OCT2017/Site_Data_Template")[10]
+xls_file <- list.files("/Users/celine/Desktop/Templates_updated_26OCT2017/Site_Data_Template")[17]
 xls_file
 LUT_file <- "convert/Conversions_Celine11-8-17.xlsx"
 
@@ -27,18 +27,46 @@ units <- read_excel(xls_file, sheet = "Solute Units") %>%
 # Read the data in & check values
 data <- read_excel(xls_file, sheet = "Raw Data", na = "NA")
 
+if (xls_file == "Site_Data_Template_V4_NIW.xlsx") {
+  data <- read_excel(xls_file, sheet = "Raw Data", 
+                     col_types = c("text", "text", "text", "text", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", "numeric", 
+                                   "numeric", "blank"))
+  
+}
+if (xls_file == "Site_Data_Template_V4_UK.xlsx") {
+  data <- read_excel(xls_file, sheet = "Raw Data", 
+                     col_types = c("text", "text", "date", "text", "text", 
+                                   "text", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", "numeric", 
+                                   "numeric", "numeric", "numeric", "numeric", 
+                                   "numeric"))
+  
+}
+
 names <- names(data)
 str(data)
 
 # ---------- Step 2. CLEAN THE DATA ---------- #
 
-# Check if column is numeric, and if not, need to remove #VALUE! values to NA and set as numeric
-#sec_df <- as.data.frame(lapply(sec_df, function(x) gsub("#VALUE!", NA, x)), stringsAsFactors = FALSE)
-
 # Set all -9999 values to NA
 
 data <- as.data.frame(lapply(data, function(x){replace(x, x==-9999, NA)}))
-names(data) <- names # Sets same names for conversion
+names(data) <- names # Resets names for conversion
 
 # Check if Sampling Date, Time are in standard format
 
@@ -69,6 +97,41 @@ if (xls_file == "Site_Data_Template_V4_HBF.xlsx") {
   data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT") 
 }
 
+### Specific to LMP
+if (xls_file == "Site_Data_Template_V4_LMP.xlsx") {
+  names(data)[13] <- "DO mg/L"
+}
+
+## Specific to LUQ
+if(xls_file == "Site_Data_Template_V4_LUQ.xlsx") {
+  lengths <- str_length(data$Time)
+  values <- grep(3, lengths)
+  str_sub(data$Time[values], 0, 0) <- "0"
+  str_sub(data$Time, -2, 1) <- ":"
+  str_sub(data$Time, 6, 6) <- ":00"
+  data$Time <- as.POSIXct(data$Time, format = "%H:%M:%S") # Puts it in "2017-11-09 09:33:00 PST"
+  data$Time <- strftime(data$Time, format = "%H:%M:%S") # Puts it back in "09:33:00"
+  data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
+  names(data)[13] <- "DO mg/L"
+  names(data)[11] <- "Temp C"
+}
+
+## Specific to NIW
+if(xls_file == "Site_Data_Template_V4_NIW.xlsx") {
+  data$`Sampling Date` <- ymd(data$`Sampling Date`)
+  data$Time <- as.character(data$Time)
+  
+}
+
+## Specific to UK
+if(xls_file == "Site_Data_Template_V4_UK.xlsx") {
+  data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
+  names(data)[13] <- "DO mg/L"
+}
+
+data$LTER <- as.character(data$LTER)
+data$`Site/Stream Name` <- as.character(data$`Site/Stream Name`)
+
 # ---------- Step 3. JOIN THE DATA ---------- #
 
 # Set Measurement in units with same chemical name as LUT
@@ -84,6 +147,7 @@ convert <- left_join(units, LUT2, by = c("Measurement" = "Measurement", "Unit" =
 convert$Measurement[grep("Specific Conductance", convert$Measurement)] <- "Spec Cond"
 convert$Measurement[grep("Q", convert$Measurement)] <- "Q (Discharge)"
 convert$Measurement[grep("Alkalinity", convert$Measurement)] <- "alkalinity"
+## DO % and Temp C not same, but these don't seem to have conversions so not important
 
 # ---------- Step 4. CONVERT THE DATA ---------- #
 
@@ -109,6 +173,7 @@ for (i in 1:length(data)) {
 
 
 # ---------- Step 5. Export as .csv file ------- #
+
 setwd("/Users/celine/Desktop/Templates_updated_26OCT2017/csv_conversions")
 str_sub(xls_file, -5, str_length(xls_file)) <- "_converted.csv"
 output_file <- xls_file
