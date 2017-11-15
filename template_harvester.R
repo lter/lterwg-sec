@@ -1,16 +1,50 @@
+#################################################################################################
+### This script harvests the templates created for the different LTER and international sites ###
+### that were selected by the LTER working group Stream Elementary Stream elemental cycling   ###
+#################################################################################################
+
+### Authors: Celine Mol and Julien Brun, NCEAS, UCSB
+### Email: SciComp@nceas.ucsb.edu
+
+
+
+# ------ General Comments ------ #
+#TIMB works
+#Problem with Fin
+
+
+### LIBRARIES ----
+
 library(dplyr)
 library(readxl)
 library(tidyverse)
 library(stringr)
 library(lubridate)
 
-# ------ General Comments ------ #
-#TIMB works
-#Problem with Fin
-setwd("/Users/celine/Desktop/Templates_updated_26OCT2017")
-xls_file <- list.files("/Users/celine/Desktop/Templates_updated_26OCT2017/Site_Data_Template")[17]
+
+### CONSTANT ----
+
+# setwd("/Users/celine/Desktop/Templates_updated_26OCT2017")
+# Set the path to directory containing the templates and LUT
+data_path <- "Templates_updated_26OCT2017"
+output_path <- file.path(data_path, "csv_conversions")
+# test if the directory exists
+dir.create(output_path, showWarnings = FALSE)
+# Filename to LUT
+# LUT_file <- file.path(data_path, "Conversions_Celine11-8-17.xlsx") ## This file is not the the GDrive
+LUT_file <- file.path(data_path, "Conversions_Celine11-3-17.xlsx") ## This file is not the the GDrive
+
+# List all the templates
+xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
+xls_templates
+
+
+### MAIN ----
+
+# Need to add the loop througg the files
+
+xls_file <- xls_templates[1]
 xls_file
-LUT_file <- "convert/Conversions_Celine11-8-17.xlsx"
 
 # ---------- Step 1. READ THE DATA ---------- #
 
@@ -19,8 +53,6 @@ LUT_file <- "convert/Conversions_Celine11-8-17.xlsx"
 LUT <- read_excel(LUT_file)
 
 # Read the raw units
-setwd("/Users/celine/Desktop/Templates_updated_26OCT2017/Site_Data_Template")
-
 units <- read_excel(xls_file, sheet = "Solute Units") %>%
   select(1:2)
 
@@ -60,6 +92,7 @@ if (xls_file == "Site_Data_Template_V4_UK.xlsx") {
 
 names <- names(data)
 str(data)
+
 
 # ---------- Step 2. CLEAN THE DATA ---------- #
 
@@ -174,8 +207,8 @@ for (i in 1:length(data)) {
 
 # ---------- Step 5. Export as .csv file ------- #
 
-setwd("/Users/celine/Desktop/Templates_updated_26OCT2017/csv_conversions")
-str_sub(xls_file, -5, str_length(xls_file)) <- "_converted.csv"
-output_file <- xls_file
+# setwd("/Users/celine/Desktop/Templates_updated_26OCT2017/csv_conversions")
+outname <- paste0(tools::file_path_sans_ext(basename(xls_file)), "_converted.csv")
+output_file <- file.path(output_path, outname)
 write.csv(data, output_file, row.names = FALSE, fileEncoding = "UTF-8", quote = TRUE)
 
