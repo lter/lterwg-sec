@@ -25,7 +25,7 @@ output_path <- file.path(data_path, "csv_conversions")
 # test if the directory exists
 dir.create(output_path, showWarnings = FALSE)
 # Filename to LUT
-LUT_file <- file.path(data_path, "Conversions_Celine11-15-17.xlsx")
+LUT_file <- file.path(data_path, "Conversions_Celine11-16-17.xlsx")
 
 # List all the templates
 xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
@@ -36,25 +36,25 @@ xls_templates
 
 # Need to add the loop through the files
 
-xls_file <- xls_templates[13]
+xls_file <- xls_templates[14]
 xls_file
 
 for (i in 1:length(xls_templates)) {
   
   # Read the data
-  data <- read_the_data(xls_file)
-  
-  # Clean the data
-  clean_data <- clean_the_data(data, xls_file)
-  
-  # Join the data
-  conversion_file <- join_the_data(LUT_file, xls_file)
-  
-  # Convert the data
-  converted <- convert_the_data(conversion_file, clean_data)
-  
-  # Output the data in a csv file
-  make_csv(converted, xls_file, output_path)
+    data <- read_the_data(xls_file)
+    
+    # Clean the data
+    clean_data <- clean_the_data(data, xls_file)
+    
+    # Join the data
+    conversion_file <- join_the_data(LUT_file, xls_file)
+    
+    # Convert the data
+    converted <- convert_the_data(conversion_file, clean_data)
+    
+    # Output the data in a csv file
+    make_csv(converted, xls_file, output_path)
 }
 
 # ---------- Step 1. READ THE DATA ---------- #
@@ -192,6 +192,7 @@ join_the_data <- function(conversions_file, file) {
   convert$Measurement[grep("Specific Conductance", convert$Measurement)] <- "Spec Cond"
   convert$Measurement[grep("Q", convert$Measurement)] <- "Q (Discharge)"
   convert$Measurement[grep("Alkalinity", convert$Measurement)] <- "alkalinity"
+  convert$Measurement[convert$Measurement == "DO"] <- "DO mg/L"
   ## DO % and Temp C not same, but these don't seem to have conversions so not important
   
   return(convert)
