@@ -7,7 +7,7 @@ setwd("/Users/celine/Desktop")
 
 # ----- CONSTANTS ----- #
 data_path <- "Templates_updated_26OCT2017/csv_conversions"
-output_file <- "AGGREGATE_Templates_11-15-17.csv"
+output_file <- "AGGREGATE_Templates_11-16-17.csv"
 csv_files <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
 csv_files
 
@@ -104,7 +104,7 @@ write.csv(first_file, output_file, row.names = FALSE, fileEncoding = "UTF-8", qu
 
 # ----- CHECK IF CORRECTLY CONVERTED ----- #
 
-dataset <- read.csv("AGGREGATE_Templates_11-15-17.csv")
+dataset <- read.csv(output_file)
 str(dataset)
 
 # ----- MEAN ----- #
