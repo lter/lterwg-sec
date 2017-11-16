@@ -36,26 +36,19 @@ xls_templates
 
 # Need to add the loop through the files
 
-xls_file <- xls_templates[12]
+xls_file <- xls_templates[13]
 xls_file
 
 for (i in 1:length(xls_templates)) {
-  # Read the unit conversion LUT
-  LUT <- read_excel(LUT_file)
-  
-  # Read the raw units
-  units <- read_excel(xls_file, sheet = "Solute Units") %>%
-    select(1:2)
   
   # Read the data
   data <- read_the_data(xls_file)
-  names <- names(data)
   
   # Clean the data
   clean_data <- clean_the_data(data, xls_file)
   
   # Join the data
-  conversion_file <- join_the_data(LUT)
+  conversion_file <- join_the_data(LUT_file, xls_file)
   
   # Convert the data
   converted <- convert_the_data(conversion_file, clean_data)
@@ -178,10 +171,17 @@ clean_the_data <- function(data, file) {
 
 # ---------- Step 3. JOIN THE DATA ---------- #
 
-join_the_data <- function(pre_conversions, units) {
+join_the_data <- function(conversions_file, file) {
+  # Read the unit conversion LUT
+  LUT <- read_excel(conversions_file)
+  
+  # Read the raw units
+  units <- read_excel(file, sheet = "Solute Units") %>%
+    select(1:2)
+  
   # Set Measurement in units with same chemical name as LUT
   
-  LUT2 <- mutate(pre_conversions, Measurement=str_split(Required_Form,"-", simplify = TRUE)[,1])
+  LUT2 <- mutate(LUT, Measurement=str_split(Required_Form,"-", simplify = TRUE)[,1])
   
   # Join two tables together to get conversions value
   
