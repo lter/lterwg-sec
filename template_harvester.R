@@ -18,85 +18,84 @@ library(lubridate)
 
 ### CONSTANT ----
 
-# setwd("/Users/celine/Desktop")
-# Set the path to directory containing the templates and LUT
+# define path if not using RStudio project relative to the repositor
+# setwd("/Users/celine/Desktop") 
+
+# Set the realtive path to directory containing the templates and LUT
 data_path <- "Templates_updated_26OCT2017"
 output_path <- file.path(data_path, "csv_conversions")
 # test if the directory exists
 dir.create(output_path, showWarnings = FALSE)
+
 # Filename to LUT
-LUT_file <- file.path(data_path, "Conversions_Celine11-16-17.xlsx")
+LUT_file <- file.path(data_path, "Conversions.xlsx")
 
 # List all the templates
 xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
 xls_templates
 
 
-### MAIN ----
+### FUNCTION ----
 
-# Need to add the loop through the files
-
-xls_file <- xls_templates[14]
-xls_file
-
-for (i in 1:length(xls_templates)) {
-  
-  # Read the data
-    data <- read_the_data(xls_file)
-    
-    # Clean the data
-    clean_data <- clean_the_data(data, xls_file)
-    
-    # Join the data
-    conversion_file <- join_the_data(LUT_file, xls_file)
-    
-    # Convert the data
-    converted <- convert_the_data(conversion_file, clean_data)
-    
-    # Output the data in a csv file
-    make_csv(converted, xls_file, output_path)
-}
-
-# ---------- Step 1. READ THE DATA ---------- #
-
+#' Read Excel template of LTER and other specific sites to extract data 
+#'
+#' @param xls_file A character. Filename.
+#'
+#' @return A data frame containing the data.
+#' @export
+#'
+#' @examples
+#' read_the_data("Templates_updated_26OCT2017/Site_Data_Template_V4_ARC_GRO.xlsx")
+#' 
 read_the_data <- function(xls_file) {
   # Read the data in & check values
   read_data <- read_excel(xls_file, sheet = "Raw Data", na = "NA")
+  
+  # Two templates are slightly different
   if (str_detect(xls_file, "NIW")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
-                       col_types = c("text", "text", "text", "text", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", "numeric", 
-                                     "numeric", "blank"))
+                            col_types = c("text", "text", "text", "text", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric", "blank"))
     
   }
   if (str_detect(xls_file, "UK")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
-                       col_types = c("text", "text", "date", "text", "text", 
-                                     "text", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", "numeric", 
-                                     "numeric", "numeric", "numeric", "numeric", 
-                                     "numeric"))
+                            col_types = c("text", "text", "date", "text", "text", 
+                                          "text", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric"))
     
   }
   return(read_data)
 }
 
-# ---------- Step 2. CLEAN THE DATA ---------- #
 
+#' Clean the data of various ways of storing NA as well as normalizing units
+#'
+#' @param data A data frame. Data set to be cleaned.
+#' @param file A character. Filename.Used to detect special cases.
+#'
+#' @return A data frame.
+#' @export
+#'
+#' @examples
+#' clean_the_data(site_data, "Templates_updated_26OCT2017/Site_Data_Template_V4_ARC_GRO.xlsx")
 clean_the_data <- function(data, file) {
   # Set all -9999 values to NA
   names <- names(data)
@@ -153,7 +152,6 @@ clean_the_data <- function(data, file) {
   if(str_detect(file, "NIW")) {
     data$`Sampling Date` <- ymd(data$`Sampling Date`)
     data$Time <- as.character(data$Time)
-    
   }
   
   ## Specific to UK
@@ -169,8 +167,15 @@ clean_the_data <- function(data, file) {
 }
 
 
-# ---------- Step 3. JOIN THE DATA ---------- #
-
+#' Homogenization of the measurement units across the different sites
+#'
+#' @param conversions_file 
+#' @param file 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 join_the_data <- function(conversions_file, file) {
   # Read the unit conversion LUT
   LUT <- read_excel(conversions_file)
@@ -188,7 +193,6 @@ join_the_data <- function(conversions_file, file) {
   convert <- left_join(units, LUT2, by = c("Measurement" = "Measurement", "Unit" = "Options"))
   
   # Make sure variables are the same in 'Measurements' column of convert table with 'Variable' names in data
-  
   convert$Measurement[grep("Specific Conductance", convert$Measurement)] <- "Spec Cond"
   convert$Measurement[grep("Q", convert$Measurement)] <- "Q (Discharge)"
   convert$Measurement[grep("Alkalinity", convert$Measurement)] <- "alkalinity"
@@ -198,8 +202,16 @@ join_the_data <- function(conversions_file, file) {
   return(convert)
 }
 
-# ---------- Step 4. CONVERT THE DATA ---------- #
 
+#' Title
+#'
+#' @param convert 
+#' @param data 
+#'
+#' @return
+#' @export
+#'
+#' @examples
 convert_the_data <- function(convert, data) {
   # Convert values in 'data' table by 'convert' conversions table
   # STEPS:
@@ -208,12 +220,13 @@ convert_the_data <- function(convert, data) {
   # If variable == convert$Measurement[i]
   # Multiply column by convert$Conversion[i]
   
+  # Remove NAs from the conversion (to save time in the loop)
+  converter <- na.omit(convert)
+  
   for (i in 1:length(data)) {
-    for (j in 1:nrow(convert)) {
-      if (names(data)[i] == convert$Measurement[j]) {
-        if(!is.na(convert$Conversion[j])) {
-          data[,i] = data[,i] * convert$Conversion[j]
-        }
+    for (j in 1:nrow(converter)) {
+      if (names(data)[i] == converter$Measurement[j]) {
+        data[,i] = data[,i] * converter$Conversion[j]
       }
     }
   }
@@ -221,14 +234,55 @@ convert_the_data <- function(convert, data) {
 }
 
 
-
-# ---------- Step 5. Export as .csv file ------- #
-
 make_csv <- function(data, file, outpath) {
   # setwd("/Users/celine/Desktop/Templates_updated_26OCT2017/csv_conversions")
   outname <- paste0(tools::file_path_sans_ext(basename(file)), "_converted.csv")
   output_file <- file.path(outpath, outname)
   write.csv(data, output_file, row.names = FALSE, fileEncoding = "UTF-8", quote = TRUE)
 }
+
+
+
+### MAIN ----
+
+
+for (i in 9:12) {
+  site_template <- xls_templates[i]
+  cat(sprintf("Processing template %s", basename(site_template)), "\n")
+  
+  # ---------- Step 1. READ THE DATA ---------- #
+  site_data <- read_the_data(site_template)
+
+  # ---------- Step 2. CLEAN THE DATA ---------- #
+  clean_data <- clean_the_data(site_data, site_template)
+    
+  # ---------- Step 3. BUILD THE CONVERSION TABLE ---------- #
+  conversion_file <- join_the_data(LUT_file, site_template)
+    
+  # ---------- Step 4. CONVERT THE DATA ---------- #
+  converted <- convert_the_data(conversion_file, clean_data)
+    
+  # ---------- Step 5. Export as .csv file ------- #
+  make_csv(converted, site_template, output_path)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
