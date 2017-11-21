@@ -30,10 +30,6 @@ dir.create(output_path, showWarnings = FALSE)
 # Filename to LUT
 LUT_file <- file.path(data_path, "Conversions.xlsx")
 
-# List all the templates
-xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
-xls_templates
-
 
 ### FUNCTION ----
 
@@ -138,6 +134,7 @@ clean_the_data <- function(data, file) {
   if(str_detect(file, "LUQ")) {
     lengths <- str_length(data$Time)
     values <- grep(3, lengths)
+    data$Time <- as.character(data$Time)
     str_sub(data$Time[values], 0, 0) <- "0"
     str_sub(data$Time, -2, 1) <- ":"
     str_sub(data$Time, 6, 6) <- ":00"
@@ -245,7 +242,12 @@ make_csv <- function(data, file, outpath) {
 
 ### MAIN ----
 
-for (i in 1:length(xls_templates)) {
+# List all the templates
+xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
+xls_templates
+
+for (i in 13:13) {
+# for (i in 1:length(xls_templates)) {
   site_template <- xls_templates[i]
   cat(sprintf("Processing template %s", basename(site_template)), "\n")
   
