@@ -245,8 +245,7 @@ make_csv <- function(data, file, outpath) {
 
 ### MAIN ----
 
-
-for (i in 9:12) {
+for (i in 1:length(xls_templates)) {
   site_template <- xls_templates[i]
   cat(sprintf("Processing template %s", basename(site_template)), "\n")
   
@@ -256,7 +255,7 @@ for (i in 9:12) {
   # ---------- Step 2. CLEAN THE DATA ---------- #
   clean_data <- clean_the_data(site_data, site_template)
     
-  # ---------- Step 3. BUILD THE CONVERSION TABLE ---------- #
+  # ---------- Step 3. BUILD THE UNIT CONVERSION TABLE ---------- #
   conversion_file <- join_the_data(LUT_file, site_template)
     
   # ---------- Step 4. CONVERT THE DATA ---------- #
