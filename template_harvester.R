@@ -246,8 +246,7 @@ make_csv <- function(data, file, outpath) {
 xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
 xls_templates
 
-for (i in 13:13) {
-# for (i in 1:length(xls_templates)) {
+for (i in 1:length(xls_templates)) {
   site_template <- xls_templates[i]
   cat(sprintf("Processing template %s", basename(site_template)), "\n")
   
