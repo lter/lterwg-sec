@@ -7,7 +7,7 @@
 ### Email: SciComp@nceas.ucsb.edu
 
 
-### LIBRARIES ----
+#### LIBRARIES ####
 
 library(dplyr)
 library(readxl)
@@ -16,9 +16,9 @@ library(stringr)
 library(lubridate)
 
 
-### CONSTANT ----
+#### CONSTANTS ####
 
-# define path if not using RStudio project relative to the repositor
+# define path if not using RStudio project relative to the repository
 # setwd("/Users/celine/Desktop") 
 
 # Set the realtive path to directory containing the templates and LUT
@@ -31,7 +31,7 @@ dir.create(output_path, showWarnings = FALSE)
 LUT_file <- file.path(data_path, "Conversions.xlsx")
 
 
-### FUNCTION ----
+#### FUNCTIONS ####
 
 #' Read Excel template of LTER and other specific sites to extract data 
 #'
@@ -240,7 +240,7 @@ make_csv <- function(data, file, outpath) {
 
 
 
-### MAIN ----
+#### MAIN ####
 
 # List all the templates
 xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
