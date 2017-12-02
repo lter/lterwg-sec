@@ -118,7 +118,7 @@ is.na(site_mins) <- sapply(site_mins,is.infinite)
 # MAX 
 site_maxs <- all_sites %>% 
   group_by(LTER) %>% 
-  summarise_if(is.numeric, min, na.rm = TRUE)
+  summarise_if(is.numeric, max, na.rm = TRUE)
 # Remove the infinity values created fo only NAs
 is.na(site_maxs) <- sapply(site_maxs,is.infinite)
 
