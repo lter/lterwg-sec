@@ -1,6 +1,6 @@
 #################################################################################################
 ### This script harvests the templates created for the different LTER and international sites ###
-### that were selected by the LTER working group Stream Elementary Stream elemental cycling   ###
+###           that were selected by the LTER working group Stream Elemental Cycling           ###
 #################################################################################################
 
 ### Authors: Celine Mol and Julien Brun, NCEAS, UCSB
@@ -21,9 +21,11 @@ library(lubridate)
 # define path if not using RStudio project relative to the repository
 # setwd("/Users/celine/Desktop") 
 
-# Set the realtive path to directory containing the templates and LUT
+# Set the relative path to directory containing the templates and LUT
 data_path <- "Templates_updated_26OCT2017"
 output_path <- file.path(data_path, "csv_conversions")
+# Set the relative path to all units file
+units_path <- file.path(data_path, "LTER_units.csv")
 # test if the directory exists
 dir.create(output_path, showWarnings = FALSE)
 
@@ -85,7 +87,7 @@ read_the_data <- function(xls_file) {
 #' Clean the data of various ways of storing NA as well as normalizing units
 #'
 #' @param data A data frame. Data set to be cleaned.
-#' @param file A character. Filename.Used to detect special cases.
+#' @param file A character. Filename. Used to detect special cases.
 #'
 #' @return A data frame.
 #' @export
@@ -166,13 +168,14 @@ clean_the_data <- function(data, file) {
 
 #' Homogenization of the measurement units across the different sites
 #'
-#' @param conversions_file 
-#' @param file 
+#' @param conversions_file A character. A filename to your conversions file.
+#' @param file A character. Filename. Used to import "Solute Units" sheet.
 #'
-#' @return
+#' @return A data frame. Your prepared conversions data frame.
 #' @export
 #'
 #' @examples
+#' join_the_data(LUT_file, "Templates_updated_26OCT2017/Site_Data_Template_V4_ARC_GRO.xlsx")
 join_the_data <- function(conversions_file, file) {
   # Read the unit conversion LUT
   LUT <- read_excel(conversions_file)
@@ -200,15 +203,16 @@ join_the_data <- function(conversions_file, file) {
 }
 
 
-#' Title
+#' Make unit conversions on your cleaned data file
 #'
-#' @param convert 
-#' @param data 
+#' @param convert A data frame. Your prepared conversions data frame.
+#' @param data A data frame. Your cleaned data.
 #'
 #' @return
 #' @export
 #'
 #' @examples
+#' convert_the_data(conversion_file, clean_data)
 convert_the_data <- function(convert, data) {
   # Convert values in 'data' table by 'convert' conversions table
   # STEPS:
@@ -231,6 +235,17 @@ convert_the_data <- function(convert, data) {
 }
 
 
+#' Export your cleaned and converted data into csv
+#'
+#' @param data A data frame. Your prepared converted data frame.
+#' @param file A character. File name. The name of the xls template you're working with.
+#' @param outpath A character. File path. The name of the path where you want your csv converted file to go.
+#'
+#' @return
+#' @export 
+#'
+#' @examples
+#' make_csv(converted, site_template, output_path)
 make_csv <- function(data, file, outpath) {
   # setwd("/Users/celine/Desktop/Templates_updated_26OCT2017/csv_conversions")
   outname <- paste0(tools::file_path_sans_ext(basename(file)), "_converted.csv")
@@ -239,12 +254,50 @@ make_csv <- function(data, file, outpath) {
 }
 
 
+#' Create a data frame for the units data
+#'
+#' @param conversion A data frame. Your prepared conversions data frame.
+#'
+#' @return A data frame. Your empty units data frame.
+#' @export
+#'
+#' @examples
+#' create_units_data(conversion_file)
+create_units_data <- function(conversion){
+  units_data <- as.data.frame(t(conversion$Measurement))
+  units_data <- cbind("LTER", units_data)
+  colnames(units_data) <- as.character(unlist(units_data[1,]))
+  units_data <- units_data[-1,]
+  
+  return(units_data)
+}
+
+
+#' Fill the units in units data frame
+#'
+#' @param site_template A character. File name. The name of the xls template you're working with.
+#' @param conversion A data frame. Your prepared conversions data frame.
+#' @param units_data A data frame. Your empty units data frame.
+#'
+#' @return A data frame. Your filled units data frame. 
+#' @export
+#'
+#' @examples
+#' fill_units_data(site_template, conversion_file, units_data_frame)
+fill_units_data <- function(site_template, conversion, units_data) {
+  filename <- tools::file_path_sans_ext(basename(site_template))
+  units_row <- cbind(filename, t(conversion$Unit))
+  colnames(units_row) <- colnames(units_data)
+  units_data <- rbind(units_data, units_row)
+}
 
 #### MAIN ####
 
 # List all the templates
 xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
 xls_templates
+
+
 
 for (i in 1:length(xls_templates)) {
   site_template <- xls_templates[i]
@@ -264,10 +317,21 @@ for (i in 1:length(xls_templates)) {
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
+  
+  # ---------- Step 6. CREATE UNITS DATA FRAME -------- #
+  if (i == 1){
+    units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
+  }
+  
+  
+  # ---------- Step 7. FILL UNITS DATA FRAME ------- #
+  full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
+  
+  
 }
 
-
-
+## Write csv for all units data outside of loop
+write.csv(fill_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
 
 
