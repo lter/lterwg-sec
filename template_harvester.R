@@ -289,6 +289,7 @@ fill_units_data <- function(site_template, conversion, units_data) {
   units_row <- cbind(filename, t(conversion$Unit))
   colnames(units_row) <- colnames(units_data)
   units_data <- rbind(units_data, units_row)
+  return(units_data)
 }
 
 #### MAIN ####
@@ -321,17 +322,15 @@ for (i in 1:length(xls_templates)) {
   # ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
+    full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
   }
-  
-  
   # ---------- Step 7. FILL UNITS DATA FRAME ------- #
-  full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
-  
+  full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
   
 }
 
-## Write csv for all units data outside of loop
-write.csv(fill_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
+## Write csv for all units dataframe outside of loop
+write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
 
 
