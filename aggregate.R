@@ -1,6 +1,6 @@
 ##########################################################################################
 ### This script aggregated the harmonized templates for the different study sites that ###
-### were selected by the LTER working group Stream Elementary Stream elemental cycling ###
+###          were selected by the LTER working group Stream Elemental Cycling          ###
 ##########################################################################################
 
 ### Authors: Celine Mol and Julien Brun, NCEAS, UCSB
@@ -112,14 +112,14 @@ site_means <- all_sites %>%
 site_mins <- all_sites %>% 
   group_by(LTER) %>% 
   summarise_if(is.numeric, min, na.rm = TRUE)
-# Remove the infinity values created fo only NAs
+# Remove the infinity values created for only NAs
 is.na(site_mins) <- sapply(site_mins,is.infinite)
   
 # MAX 
 site_maxs <- all_sites %>% 
   group_by(LTER) %>% 
   summarise_if(is.numeric, max, na.rm = TRUE)
-# Remove the infinity values created fo only NAs
+# Remove the infinity values created for only NAs
 is.na(site_maxs) <- sapply(site_maxs,is.infinite)
 
 ## OUTPUT SUMMARY STATISTICS
@@ -184,7 +184,7 @@ for (measurement in c("Si", "Na", "Ca", "Mg", "SO4", "Cl")){ # "Fe", "Sr", "Al"
 # fix specific K range
 all_sites$K <- ifelse(all_sites$K > 0.1 & all_sites$K < 30, all_sites$K, NA)
 
-
+# Write csv file for aggregated data frame within chosen bounds
 write.csv(all_sites, bounded_file, row.names = FALSE, fileEncoding = "UTF-8", quote = TRUE)
 
 
