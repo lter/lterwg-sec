@@ -15,7 +15,6 @@ library(tidyverse)
 library(stringr)
 library(lubridate)
 
-
 #### CONSTANTS ####
 
 # define path if not using RStudio project relative to the repository
@@ -23,7 +22,7 @@ library(lubridate)
 
 # Set the relative path to directory containing the templates and LUT
 data_path <- "Templates_updated_26OCT2017"
-output_path <- file.path(data_path, "csv_conversions")
+output_path <- file.path(data_path, "csv_conversions2")
 # Set the relative path to all units file
 units_path <- file.path(data_path, "LTER_units.csv")
 # test if the directory exists
@@ -49,7 +48,7 @@ read_the_data <- function(xls_file) {
   # Read the data in & check values
   read_data <- read_excel(xls_file, sheet = "Raw Data", na = "NA")
   
-  # Two templates are slightly different
+  # Three templates are slightly different
   if (str_detect(xls_file, "NIW")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
                             col_types = c("text", "text", "text", "text", "numeric", 
@@ -78,8 +77,27 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric"))
+  # date in this template is set to date. 
+    
     
   }
+  if (str_detect(xls_file, "WBR")) {
+    read_data <- read_excel(xls_file, sheet = "Raw Data", 
+                            col_types = c("text", "text", "text", "text", "text", 
+                                          "text", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric"))
+ # date in this template is set to Text. It did not render the conversion when sample time column was of type: date. 
+    
+  }
+
   return(read_data)
 }
 
@@ -295,16 +313,17 @@ fill_units_data <- function(site_template, conversion, units_data) {
 #### MAIN ####
 
 # List all the templates
-xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
+xls_templates <- list.files(path = data_path, pattern = "Site_Data", full.names = TRUE)
+#xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template_V4_WBR", full.names = TRUE)
 xls_templates
-
-
 
 for (i in 1:length(xls_templates)) {
   site_template <- xls_templates[i]
   cat(sprintf("Processing template %s", basename(site_template)), "\n")
   
   # ---------- Step 1. READ THE DATA ---------- #
+ 
+  #site_template<-file.path(data_path, "Site_Data_Template_V4_KBS2")
   site_data <- read_the_data(site_template)
 
   # ---------- Step 2. CLEAN THE DATA ---------- #
@@ -318,34 +337,21 @@ for (i in 1:length(xls_templates)) {
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
-  
-  # ---------- Step 6. CREATE UNITS DATA FRAME -------- #
-  if (i == 1){
-    units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
-    full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
-  }
-  # ---------- Step 7. FILL UNITS DATA FRAME ------- #
-  full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-  
 }
 
-## Write csv for all units dataframe outside of loop
-write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  # ---------- Step 6. CREATE UNITS DATA FRAME -------- #
+#   if (i == 1){
+#     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
+#     full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
+#   }
+#   # ---------- Step 7. FILL UNITS DATA FRAME ------- #
+#   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
+#   
+# }
+# 
+# ## Write csv for all units dataframe outside of loop
+# write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
 
 
