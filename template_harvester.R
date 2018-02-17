@@ -22,7 +22,7 @@ library(lubridate)
 
 # Set the relative path to directory containing the templates and LUT
 data_path <- "Templates_updated_26OCT2017"
-output_path <- file.path(data_path, "csv_conversions2")
+output_path <- file.path(data_path, "csv_conversions")
 # Set the relative path to all units file
 units_path <- file.path(data_path, "LTER_units.csv")
 # test if the directory exists
@@ -61,7 +61,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric", "blank"))
+                                          "numeric", "numeric", "numeric", "blank"))
     
   }
   if (str_detect(xls_file, "UK")) {
@@ -76,14 +76,14 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric"))
+                                          "numeric", "numeric", "numeric"))
   # date in this template is set to date. 
     
     
   }
   if (str_detect(xls_file, "WBR")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
-                            col_types = c("text", "text", "text", "text", "text", 
+                            col_types = c("text", "text", "date", "text", "text", 
                                           "text", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", 
@@ -93,11 +93,28 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric"))
+                                          "numeric", "numeric","numeric"))
  # date in this template is set to Text. It did not render the conversion when sample time column was of type: date. 
     
   }
-
+  
+  if (str_detect(xls_file, "LIN")) {
+    read_data <- read_excel(xls_file, sheet = "Raw Data", 
+                            col_types = c("text", "text", "date", "text", "text", 
+                                          "text", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric", "numeric", "numeric", 
+                                          "numeric", "numeric","numeric"))
+    
+    # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
+    
+  }
   return(read_data)
 }
 
@@ -125,6 +142,11 @@ clean_the_data <- function(data, file) {
     data$`Sampling Date` <- gsub("[.]","-", data$`Sampling Date`)
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
+  ### For V4_WBR
+  
+  #if (str_detect(file, "WBR")){
+  #  data$`Sampling Date`<-mdy(data$`Sampling Date`)
+  #}
   
   ### Specific to V4_AND, ALSO ASSUMING cm == cms
   if (str_detect(file, "AND")) {
