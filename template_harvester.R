@@ -3,7 +3,7 @@
 ###           that were selected by the LTER working group Stream Elemental Cycling           ###
 #################################################################################################
 
-### Authors: Celine Mol and Julien Brun, NCEAS, UCSB
+### Authors: Celine Mol, Margaux Sleckman and Julien Brun, NCEAS, UCSB
 ### Email: SciComp@nceas.ucsb.edu
 
 
@@ -21,15 +21,18 @@ library(lubridate)
 # setwd("/Users/celine/Desktop") 
 
 # Set the relative path to directory containing the templates and LUT
-data_path <- "Templates_updated_26OCT2017"
-output_path <- file.path(data_path, "csv_conversions")
+# Assuming the top folder for the data is named "Templates_updated_26OCT2017", 
+# similar as on the working group Goolgle Drive
+
+template_folder <- "Templates_updated_26OCT2017" 
+output_path <- file.path(template_folder, "csv_conversions")
 # Set the relative path to all units file
-units_path <- file.path(data_path, "LTER_units.csv")
+units_path <- file.path(template_folder, "LTER_units.csv")
 # test if the directory exists
 dir.create(output_path, showWarnings = FALSE)
 
 # Filename to LUT
-LUT_file <- file.path(data_path, "Conversions.xlsx")
+LUT_file <- file.path(template_folder, "Conversions.xlsx")
 
 
 #### FUNCTIONS ####
@@ -335,8 +338,8 @@ fill_units_data <- function(site_template, conversion, units_data) {
 #### MAIN ####
 
 # List all the templates
-xls_templates <- list.files(path = data_path, pattern = "Site_Data", full.names = TRUE)
-#xls_templates <- list.files(path = data_path, pattern = "Site_Data_Template_V4_WBR", full.names = TRUE)
+xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_WBR", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -345,7 +348,7 @@ for (i in 1:length(xls_templates)) {
   
   # ---------- Step 1. READ THE DATA ---------- #
  
-  #site_template<-file.path(data_path, "Site_Data_Template_V4_KBS2")
+  #site_template<-file.path(template_folder, "Site_Data_Template_V4_KBS2")
   site_data <- read_the_data(site_template)
 
   # ---------- Step 2. CLEAN THE DATA ---------- #
@@ -361,7 +364,7 @@ for (i in 1:length(xls_templates)) {
   make_csv(converted, site_template, output_path)
 }
 
-
+## Only needef when building the units summary
   # ---------- Step 6. CREATE UNITS DATA FRAME -------- #
 #   if (i == 1){
 #     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME

@@ -3,7 +3,7 @@
 ###          were selected by the LTER working group Stream Elemental Cycling          ###
 ##########################################################################################
 
-### Authors: Celine Mol and Julien Brun, NCEAS, UCSB
+### Authors: Celine Mol, Margaux Sleckman, and Julien Brun, NCEAS, UCSB
 ### Email: SciComp@nceas.ucsb.edu
 
 
@@ -16,8 +16,18 @@ library(tidyverse)
 
 # define path if not using RStudio project relative to the repository
 # setwd("/Users/celine/Desktop") 
+# Assuming the folder organization matches the Google Drive orgnaization and the 
+# Template_harvester.R output
+
+# input files
+template_folder <- "Templates_updated_26OCT2017" 
+conversion_folder <- "csv_conversions"
+data_path <- file.path(template_folder, conversion_folder)
+# Check that this directory exists and alt the script if not
+stopifnot(dir.exists(data_path))
+
+# Output files
 today <- Sys.Date()
-data_path <- "Templates_updated_26OCT2017/csv_conversions"
 aggregated_file <- paste0("AGGREGATE_Templates_", today, ".csv")
 bounded_file <- paste0("INBOUNDS_AGGREGATE_Templates_",today,".csv")
 
@@ -93,7 +103,7 @@ aggregator <- function(csv_list) {
 # ---------- Step 1. AGGREGATE THE DATA ---------- #
 
 # List the csv files to aggregate
-csv_files <- list.files(path = data_path, pattern = "Site_Data_Template", full.names = TRUE)
+csv_files <- list.files(path = data_path, pattern = "*.csv", full.names = TRUE)
 csv_files
 
 # Aggregate the converted files
@@ -133,6 +143,7 @@ write.csv(site_maxs, "MAX_Summary_Statistics.csv", row.names = FALSE, fileEncodi
 
 # ---------- Step 3. BOUND DATA IN A PLAUSIBLE RANGE ---------- #
 
+## Need to extract these values into a csv
 # fix PH range
 all_sites$pH <- ifelse(all_sites$pH >= 4 & all_sites$pH <= 9,  all_sites$pH, NA)
 
