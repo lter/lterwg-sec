@@ -24,7 +24,7 @@ library(lubridate)
 # Assuming the top folder for the data is named "Templates_updated_26OCT2017", 
 # similar as on the working group Goolgle Drive
 
-template_folder <- "Templates_updated_26OCT2017" 
+template_folder <- "Templates_201802" 
 output_path <- file.path(template_folder, "csv_conversions")
 # Set the relative path to all units file
 units_path <- file.path(template_folder, "LTER_units.csv")
