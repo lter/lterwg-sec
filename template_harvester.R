@@ -362,17 +362,16 @@ for (i in 1:length(xls_templates)) {
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
-}
+ }
 
-## Only needef when building the units summary
-  # ---------- Step 6. CREATE UNITS DATA FRAME -------- #
+## Only needed when building the units summary
+#   #---------- Step 6. CREATE UNITS DATA FRAME -------- #
 #   if (i == 1){
 #     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
-#     full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
 #   }
 #   # ---------- Step 7. FILL UNITS DATA FRAME ------- #
 #   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-#   
+# 
 # }
 # 
 # ## Write csv for all units dataframe outside of loop
