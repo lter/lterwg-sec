@@ -24,7 +24,9 @@ library(lubridate)
 # Assuming the top folder for the data is named "Templates_updated_26OCT2017", 
 # similar as on the working group Goolgle Drive
 
-template_folder <- "Templates_201802" 
+#template_folder <- "Templates_201802" 
+template_folder<-"Templates_updated_26OCT2017"
+
 output_path <- file.path(template_folder, "csv_conversions")
 # Set the relative path to all units file
 units_path <- file.path(template_folder, "LTER_units.csv")
@@ -364,7 +366,7 @@ for (i in 1:length(xls_templates)) {
   make_csv(converted, site_template, output_path)
  }
 
-<<<<<<< HEAD
+#<<<<<<< HEAD
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
@@ -376,7 +378,8 @@ for (i in 1:length(xls_templates)) {
 
 ## Write csv for all units dataframe outside of loop
  write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
-=======
+
+ #=======
 ## Only needed when building the units summary
 #   #---------- Step 6. CREATE UNITS DATA FRAME -------- #
 #   if (i == 1){
@@ -389,7 +392,7 @@ for (i in 1:length(xls_templates)) {
 # 
 # ## Write csv for all units dataframe outside of loop
 # write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
->>>>>>> e1da4144e31b60d89689acb7bb025dfe8af66db4
+#>>>>>>> e1da4144e31b60d89689acb7bb025dfe8af66db4
 
 
 
