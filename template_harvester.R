@@ -8,7 +8,8 @@
 
 
 #### LIBRARIES ####
-
+library(googledrive)
+library(purrr)
 library(dplyr)
 library(readxl)
 library(tidyverse)
@@ -21,11 +22,16 @@ library(lubridate)
 # setwd("/Users/celine/Desktop") 
 
 # Set the relative path to directory containing the templates and LUT
-# Assuming the top folder for the data is named "Templates_updated_26OCT2017", 
+# Assuming the top folder for the data is named "Templates_201802", 
 # similar as on the working group Goolgle Drive
 
-#template_folder <- "Templates_201802" 
-template_folder<-"Templates_updated_26OCT2017"
+template_folder <- "Templates_201802" 
+# test if the directory exists
+dir.create(template_folder, showWarnings = FALSE)
+
+# List the templates from the google Drive
+drive_folder <- "1HgU9ynNdUGD-YoTbk4hoK8KTV-uChoB8"
+templates_drive <- drive_ls(as_id(drive_folder), pattern = "xlsx")
 
 output_path <- file.path(template_folder, "csv_conversions")
 # Set the relative path to all units file
@@ -38,6 +44,24 @@ LUT_file <- file.path(template_folder, "Conversions.xlsx")
 
 
 #### FUNCTIONS ####
+
+
+#' Download the templates from Google Drive
+#'
+#' @param templates_dribble a dribble
+#' @param local_folder a character
+#'
+#' @export
+#'
+#' @examples template_downloader(templates_drive, "Templates_201802")
+template_downloader <- function(templates_dribble, local_folder){
+  # Download the templates
+  for (i in 1:nrow(templates_dribble)){
+    drive_download(as_id(templates_dribble$id[[i]]), 
+                   file.path(local_folder, templates_dribble$name[[i]]),
+                   overwrite = TRUE)
+  }
+}
 
 #' Read Excel template of LTER and other specific sites to extract data 
 #'
@@ -339,6 +363,9 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 #### MAIN ####
 
+# ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
+
+
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
 #xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_WBR", full.names = TRUE)
@@ -366,7 +393,6 @@ for (i in 1:length(xls_templates)) {
   make_csv(converted, site_template, output_path)
  }
 
-#<<<<<<< HEAD
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
@@ -379,20 +405,6 @@ for (i in 1:length(xls_templates)) {
 ## Write csv for all units dataframe outside of loop
  write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
- #=======
-## Only needed when building the units summary
-#   #---------- Step 6. CREATE UNITS DATA FRAME -------- #
-#   if (i == 1){
-#     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
-#   }
-#   # ---------- Step 7. FILL UNITS DATA FRAME ------- #
-#   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-# 
-# }
-# 
-# ## Write csv for all units dataframe outside of loop
-# write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
-#>>>>>>> e1da4144e31b60d89689acb7bb025dfe8af66db4
-
+ 
 
 
