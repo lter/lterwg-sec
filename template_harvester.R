@@ -24,8 +24,7 @@ library(lubridate)
 # Assuming the top folder for the data is named "Templates_updated_26OCT2017", 
 # similar as on the working group Goolgle Drive
 
-#template_folder <- "Templates_201802" 
-template_folder<-"Templates_updated_26OCT2017"
+template_folder <- "Templates_201802" 
 
 output_path <- file.path(template_folder, "csv_conversions")
 # Set the relative path to all units file
@@ -341,7 +340,7 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_WBR", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_KNZ", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -364,8 +363,7 @@ for (i in 1:length(xls_templates)) {
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
- }
-
+ 
 #<<<<<<< HEAD
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
@@ -374,7 +372,7 @@ for (i in 1:length(xls_templates)) {
    }
    # ---------- Step 7. FILL UNITS DATA FRAME ------- #
    full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-
+}
 
 ## Write csv for all units dataframe outside of loop
  write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)

@@ -20,8 +20,8 @@ library(tidyverse)
 # Template_harvester.R output
 
 # input files
-#template_folder <- "Templates_201802" 
-template_folder<-"Templates_updated_26OCT2017"
+template_folder <- "Templates_201802" 
+#template_folder<-"Templates_updated_26OCT2017"
 conversion_folder <- "csv_conversions"
 data_path <- file.path(template_folder, conversion_folder)
 # Check that this directory exists and alt the script if not
