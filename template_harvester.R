@@ -144,9 +144,59 @@ read_the_data <- function(xls_file) {
     # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
     
   }
+  
+  # #if (str_detect(xls_file, "KNZ")) {
+  #   read_data <- read_excel(xls_file, sheet = "Raw Data", 
+  #                           col_types = c("text", "text", "date", "text", "text", 
+  #                                         "text", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric", "numeric", "numeric", 
+  #                                         "numeric", "numeric","numeric"))
+    
+    # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
+    
+ # }
+  
+
+   if (str_detect(xls_file, "Fin")) {
+    read_data <- read_excel(xls_file, sheet = "Raw Data",
+                         col_types = c("text", "text", "text", "text", "text",
+                                          "text", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric", "numeric",
+                                          "numeric", "numeric","numeric"))
+   }
+  
+  #Fin dates should be kept as text!
+  
+  # date in this template is set to Text. Otherwise, conversion turns dates into numerals.
+# 
+# #merges tabs for UK dataset (wait on this. Dataset requires some cleaning before getting into a template).
+#   if (str_detect(xls_file, "UK")) {
+#   read_data <- function(xls_file){
+#     sheets<-readxl::excel_sheets(xls_file)
+#     x<-lapply(sheets, function(X) readxl::read_excel(xls_file) )
+#     lapply(sheets, function(X) readxl::read_excel(xls_file, sheet=X))
+#     names(x)<-sheets
+#     x
+#   }
+#   }  # date in this template is set to Text. It did not render the conversion when sample time column was of type: date. 
+  
+ 
   return(read_data)
 }
-
 
 #' Clean the data of various ways of storing NA as well as normalizing units
 #'
@@ -167,11 +217,19 @@ clean_the_data <- function(data, file) {
   # Check if Sampling Date, Time are in standard format
   
   #### For V4_Fin
-  if (str_detect(file, "Fin")) { # class(data$`Sampling Date`)[1] != "POSIXct"
+  if (str_detect(file, "Fin")){ # class(data$`Sampling Date`)[1] != "POSIXct"
     data$`Sampling Date` <- gsub("[.]","-", data$`Sampling Date`)
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
+}
+
+  if (str_detect(file, "Fin")){
+      data$DOC<-data$TOC*0.95 
+      data$TDN<-data$TN*0.95
+      data$DON<-data$TDN-data$NH4+data$NO3
   }
-  ### For V4_WBR
+  
+  
+### For V4_WBR
   
   #if (str_detect(file, "WBR")){
   #  data$`Sampling Date`<-mdy(data$`Sampling Date`)
@@ -368,7 +426,7 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_WBR", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_Fin", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
