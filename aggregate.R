@@ -75,29 +75,31 @@ aggregator <- function(csv_list) {
                                               Cl = col_double(),
                                               DOP = col_double(),
                                               TP = col_double(),
-                                              TSS = col_double()))
+                                              TSS = col_double(),
+                                              PP = col_double(),
+                                              PON = col_double()))
     # Handle the first file case
     if (i > 1) {
-      if (ncol(current_file) <= 37) { # remove extra columns like location
+      if (ncol(current_file) <= 39) { # remove extra columns like location
         all_csvs <-  rbind(all_csvs, current_file)
         } else {
-        cat(sprintf("this template %s has more than the expected 37 columns", basename(csv_list[i])),"\n")
-        all_csvs <-  rbind(all_csvs, current_file[,1:37]) 
+        cat(sprintf("this template %s has more than the expected 39 columns", basename(csv_list[i])),"\n")
+        all_csvs <-  rbind(all_csvs, current_file[,1:39]) 
         }
       } else {
       all_csvs <-  current_file
     }
   }
+  
   # Set fields names
   colnames(all_csvs) <- c("LTER", "Site_Stream_Name", "Sampling_Date", "Time",
                             "Land_Use", "Treatment", "Q_Discharge", "alkalinity",
                             "ANC", "pH", "Temp_C", "DIC", "DO_mg_L", "DO_percent", "Conductivity",
                             "Spec_Cond", "DOC", "TOC", "TDN", "TN", "DON", "NO3", "NH4",
-                            "TKN", "PO4", "SRP", "Si", "TDP", "Na", "K", "Ca", "Mg", "SO4", "Cl", "DOP", "TP", "TSS")
+                            "TKN", "PO4", "SRP", "Si", "TDP", "Na", "K", "Ca", "Mg", "SO4", "Cl", "DOP", "TP", "TSS", "PP", "PON")
 
   return(all_csvs)
 }
-
 
 #### MAIN ####
 
