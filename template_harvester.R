@@ -146,24 +146,6 @@ read_the_data <- function(xls_file) {
     
   }
   
-  # #if (str_detect(xls_file, "KNZ")) {
-  #   read_data <- read_excel(xls_file, sheet = "Raw Data", 
-  #                           col_types = c("text", "text", "date", "text", "text", 
-  #                                         "text", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric","numeric", "numeric", "numeric"))
-    
-    # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
-    
- # }
-  
 
    if (str_detect(xls_file, "Fin")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data",
@@ -429,6 +411,7 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
+template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
