@@ -90,7 +90,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric", "numeric", "numeric", "blank"))
+                                          "numeric", "numeric", "numeric", "numeric", "numeric", "blank"))
     
   }
   if (str_detect(xls_file, "UK")) {
@@ -105,7 +105,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric", "numeric", "numeric"))
+                                          "numeric", "numeric", "numeric", "numeric", "numeric"))
   # date in this template is set to date. 
     
     
@@ -122,7 +122,8 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric", "numeric","numeric"))
+                                          "numeric", "numeric","numeric", "numeric", "numeric"))
+    
  # date in this template is set to Text. It did not render the conversion when sample time column was of type: date. 
     
   }
@@ -139,7 +140,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric", "numeric","numeric"))
+                                          "numeric", "numeric","numeric", "numeric", "numeric"))
     
     # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
     
@@ -157,7 +158,7 @@ read_the_data <- function(xls_file) {
   #                                         "numeric", "numeric", "numeric", 
   #                                         "numeric", "numeric", "numeric", "numeric", 
   #                                         "numeric", "numeric", "numeric", "numeric", 
-  #                                         "numeric", "numeric","numeric"))
+  #                                         "numeric", "numeric","numeric", "numeric", "numeric"))
     
     # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
     
@@ -176,7 +177,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric",
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric", "numeric", "numeric",
-                                          "numeric", "numeric","numeric"))
+                                          "numeric", "numeric","numeric", "numeric","numeric"))
    }
   
   #Fin dates should be kept as text!
@@ -240,6 +241,11 @@ clean_the_data <- function(data, file) {
     #units[[1,2]] <- "cms"
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT") 
   }
+  
+  # ###Specfic to V4_UK for time 
+  # if (str_detect(file, "UK")){
+  #   data$Time<-strftime(data$Time, format = "%H:%M:%S", tz="GMT")
+  # }
   
   ### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
   
@@ -426,7 +432,7 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_Fin", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_COL", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -449,20 +455,29 @@ for (i in 1:length(xls_templates)) {
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
- }
 
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
-     full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
-   }
+    full_units_data <- fill_units_data(site_template, conversion_file, units_data_frame)
+  }
+
    # ---------- Step 7. FILL UNITS DATA FRAME ------- #
    full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
 
+}
 
 ## Write csv for all units dataframe outside of loop
- write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
+write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
- 
+# ## Only needed when building the units summary
+#   #---------- Step 6. CREATE UNITS DATA FRAME -------- #
+#   if (i == 1){
+#     units_data_frame <- create_units_data(conversion_file) # DO THIS JUST ONCE, NOT EVERY TIME
+#   }
+#   # ---------- Step 7. FILL UNITS DATA FRAME ------- #
+#   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
+
+
 
 
