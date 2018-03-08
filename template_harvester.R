@@ -31,7 +31,7 @@ dir.create(template_folder, showWarnings = FALSE)
 
 # List the templates from the google Drive
 drive_folder <- "1HgU9ynNdUGD-YoTbk4hoK8KTV-uChoB8"
-templates_drive <- drive_ls(as_id(drive_folder), pattern = "xlsx")
+templates_on_drive <- drive_ls(as_id(drive_folder), pattern = "xlsx")
 
 output_path <- file.path(template_folder, "csv_conversions")
 # Set the relative path to all units file
@@ -411,10 +411,10 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
-template_downloader(templates_on_drive, template_folder)
+# template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
-xls_templates <- list.files(path = template_folder, pattern = "Site_Data", full.names = TRUE)
+xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
 #xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_COL", full.names = TRUE)
 xls_templates
 

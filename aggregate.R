@@ -37,6 +37,7 @@ bounded_file <- paste0("INBOUNDS_AGGREGATE_Templates_",today,".csv")
 
 aggregator <- function(csv_list) {
   for (i in seq_along(csv_list)){
+    cat(sprintf("Aggregating template %s", basename(csv_list[i])), "\n")
     # read the converted site csv
     current_file <- read_csv(csv_list[i], 
                              col_types = cols(LTER = col_character(),
