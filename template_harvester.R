@@ -42,9 +42,7 @@ dir.create(output_path, showWarnings = FALSE)
 # Filename to LUT
 LUT_file <- file.path(template_folder, "Conversions.xlsx")
 
-
 #### FUNCTIONS ####
-
 
 #' Download the templates from Google Drive
 #'
@@ -95,7 +93,7 @@ read_the_data <- function(xls_file) {
   }
   if (str_detect(xls_file, "UK")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
-                            col_types = c("text", "text", "date", "text", "text", 
+                            col_types = c("text", "text", "date", "date", "text", 
                                           "text", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", 
@@ -106,8 +104,10 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", "numeric"))
-  # date in this template is set to date. 
-    
+  
+    # date in this template is set to date. 
+    # set time to date as well to avoid conversion to time. 
+
     
   }
   if (str_detect(xls_file, "WBR")) {
@@ -160,12 +160,12 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric","numeric", "numeric","numeric"))
-   }
+    
+    #Fin dates should be kept as text! Otherwise, conversion turns dates into numerals.
+    
+      }
   
-  #Fin dates should be kept as text!
-  
-  # date in this template is set to Text. Otherwise, conversion turns dates into numerals.
-# 
+ 
 # #merges tabs for UK dataset (wait on this. Dataset requires some cleaning before getting into a template).
 #   if (str_detect(xls_file, "UK")) {
 #   read_data <- function(xls_file){
@@ -197,7 +197,8 @@ clean_the_data <- function(data, file) {
   data <- as.data.frame(lapply(data, function(x){replace(x, x==-9999, NA)}))
   names(data) <- names # Resets names for conversion
   
-  # Check if Sampling Date, Time are in standard format
+  
+  # Check if Sampling Date, Time are in standard format and other changes
   
   #### For V4_Fin
   if (str_detect(file, "Fin")){ # class(data$`Sampling Date`)[1] != "POSIXct"
@@ -211,23 +212,13 @@ clean_the_data <- function(data, file) {
       data$DON<-data$TDN-data$NH4+data$NO3
   }
   
-  
 ### For V4_WBR
-  
-  #if (str_detect(file, "WBR")){
-  #  data$`Sampling Date`<-mdy(data$`Sampling Date`)
-  #}
   
   ### Specific to V4_AND, ALSO ASSUMING cm == cms
   if (str_detect(file, "AND")) {
     #units[[1,2]] <- "cms"
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT") 
   }
-  
-  # ###Specfic to V4_UK for time 
-  # if (str_detect(file, "UK")){
-  #   data$Time<-strftime(data$Time, format = "%H:%M:%S", tz="GMT")
-  # }
   
   ### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
   
@@ -247,7 +238,7 @@ clean_the_data <- function(data, file) {
     names(data)[13] <- "DO mg/L"
   }
   
-  ## Specific to LUQ
+  ### Specific to LUQ
   if(str_detect(file, "LUQ")) {
     lengths <- str_length(data$Time)
     values <- grep(3, lengths)
@@ -262,24 +253,25 @@ clean_the_data <- function(data, file) {
     names(data)[11] <- "Temp C"
   }
   
-  ## Specific to NIW
+  ### Specific to NIW
   if(str_detect(file, "NIW")) {
     data$`Sampling Date` <- ymd(data$`Sampling Date`)
     data$Time <- as.character(data$Time)
   }
   
-  ## Specific to UK
+  ### Specific to UK
   if(str_detect(file, "UK")) {
     data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
+    # data$Time <- as.POSIXct(data$Time, format = "%H:%M:%S")  #this was tested but is not necessary
+    data$Time <- strftime(data$Time, format = "%H:%M:%S", tz="GMT") #changes the GMT format, removes AM/PM
     names(data)[13] <- "DO mg/L"
   }
+
   
   data$LTER <- as.character(data$LTER)
   data$`Site/Stream Name` <- as.character(data$`Site/Stream Name`)
-  
   return(data)
 }
-
 
 #' Homogenization of the measurement units across the different sites
 #'
@@ -368,7 +360,6 @@ make_csv <- function(data, file, outpath) {
   write.csv(data, output_file, row.names = FALSE, fileEncoding = "UTF-8", quote = TRUE)
 }
 
-
 #' Create a data frame for the units data
 #'
 #' @param conversion A data frame. Your prepared conversions data frame.
@@ -386,7 +377,6 @@ create_units_data <- function(conversion){
   
   return(units_data)
 }
-
 
 #' Fill the units in units data frame
 #'
@@ -407,15 +397,16 @@ fill_units_data <- function(site_template, conversion, units_data) {
   return(units_data)
 }
 
+
 #### MAIN ####
 
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
-# template_downloader(templates_on_drive, template_folder)
+template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_COL", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_UK", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -453,6 +444,8 @@ for (i in 1:length(xls_templates)) {
 ## Write csv for all units dataframe outside of loop
 write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
 
+
+###test code for step 6. Removed full_units_data from function.
 # ## Only needed when building the units summary
 #   #---------- Step 6. CREATE UNITS DATA FRAME -------- #
 #   if (i == 1){
