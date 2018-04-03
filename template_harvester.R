@@ -204,12 +204,13 @@ clean_the_data <- function(data, file) {
   if (str_detect(file, "Fin")){ # class(data$`Sampling Date`)[1] != "POSIXct"
     data$`Sampling Date` <- gsub("[.]","-", data$`Sampling Date`)
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
-}
-
+  }
   if (str_detect(file, "Fin")){
-      data$DOC<-data$TOC*0.95 
-      data$TDN<-data$TN*0.95
-      data$DON<-data$TDN-data$NH4+data$NO3
+    data$DOC<-data$TOC*0.95 
+    data$TDN<-data$TN*0.95
+  }
+  if (str_detect(file, "Fin")){
+    data$DON<-data$TDN-(data$NH4+data$NO3)
   }
   
 ### For V4_WBR
@@ -233,6 +234,7 @@ clean_the_data <- function(data, file) {
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT") 
   }
   
+
   ### Specific to LMP
   if (str_detect(file, "LMP")) {
     names(data)[13] <- "DO mg/L"
@@ -402,11 +404,11 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
-template_downloader(templates_on_drive, template_folder)
+#template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_UK", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_Fin", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -438,7 +440,6 @@ for (i in 1:length(xls_templates)) {
 
    # ---------- Step 7. FILL UNITS DATA FRAME ------- #
    full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-
 }
 
 ## Write csv for all units dataframe outside of loop
