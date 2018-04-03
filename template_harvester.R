@@ -210,7 +210,7 @@ clean_the_data <- function(data, file) {
     data$TDN<-data$TN*0.95
   }
   if (str_detect(file, "Fin")){
-    data$DON<-data$TDN-(data$NH4+data$NO3)
+    data$DON<-(data$TDN-(data$NH4+data$NO3))
   }
   
 ### For V4_WBR
