@@ -206,13 +206,11 @@ clean_the_data <- function(data, file) {
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
   if (str_detect(file, "Fin")){
-    data$DOC<-data$TOC*0.95 
+    data$DOC<-data$TOC*0.95
     data$TDN<-data$TN*0.95
-  }
-  if (str_detect(file, "Fin")){
     data$DON<-(data$TDN-(data$NH4+data$NO3))
   }
-  
+
 ### For V4_WBR
   
   ### Specific to V4_AND, ALSO ASSUMING cm == cms
@@ -269,7 +267,6 @@ clean_the_data <- function(data, file) {
     names(data)[13] <- "DO mg/L"
   }
 
-  
   data$LTER <- as.character(data$LTER)
   data$`Site/Stream Name` <- as.character(data$`Site/Stream Name`)
   return(data)
@@ -340,6 +337,8 @@ convert_the_data <- function(convert, data) {
       }
     }
   }
+
+    
   return(data)
 }
 
@@ -401,14 +400,13 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 
 #### MAIN ####
-
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
-#template_downloader(templates_on_drive, template_folder)
+template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
-xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_Fin", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
+xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_Fin", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
