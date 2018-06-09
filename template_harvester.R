@@ -70,12 +70,14 @@ template_downloader <- function(templates_dribble, local_folder){
 #'
 #' @examples
 #' read_the_data("Templates_updated_26OCT2017/Site_Data_Template_V4_ARC_GRO.xlsx")
-#' 
+#'
+ 
 read_the_data <- function(xls_file) {
   # Read the data in & check values
   read_data <- read_excel(xls_file, sheet = "Raw Data", na = "NA")
   
   # Three templates are slightly different
+  
   if (str_detect(xls_file, "NIW")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
                             col_types = c("text", "text", "text", "text", "numeric", 
@@ -88,7 +90,8 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
-                                          "numeric", "numeric", "numeric", "numeric", "numeric", "blank"))
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "blank"))
     
   }
   if (str_detect(xls_file, "UK")) {
@@ -107,9 +110,8 @@ read_the_data <- function(xls_file) {
   
     # date in this template is set to date. 
     # set time to date as well to avoid conversion to time. 
-
-    
   }
+  
   if (str_detect(xls_file, "WBR")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
                             col_types = c("text", "text", "date", "text", "text", 
@@ -123,7 +125,6 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric","numeric", "numeric", "numeric"))
-    
  # date in this template is set to Text. It did not render the conversion when sample time column was of type: date. 
     
   }
@@ -164,7 +165,23 @@ read_the_data <- function(xls_file) {
     #Fin dates should be kept as text! Otherwise, conversion turns dates into numerals.
     
       }
-  
+
+  if (str_detect(xls_file, "HBF")) {
+    read_data <- read_excel(xls_file, sheet = "Raw Data",
+                            col_types = c("text", "text", "date", "date", "text",
+                                          "text", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric", "numeric",
+                                          "numeric", "numeric","numeric", "numeric","numeric"))
+    #To convert TDN and DON values
+    
+  }
  
 # #merges tabs for UK dataset (wait on this. Dataset requires some cleaning before getting into a template).
 #   if (str_detect(xls_file, "UK")) {
@@ -198,9 +215,9 @@ clean_the_data <- function(data, file) {
   names(data) <- names # Resets names for conversion
   
   
-  # Check if Sampling Date, Time are in standard format and other changes
-  
-  #### For V4_Fin
+# Check if Sampling Date, Time are in standard format and other changes
+
+    #### For V4_Fin
   if (str_detect(file, "Fin")){ # class(data$`Sampling Date`)[1] != "POSIXct"
     data$`Sampling Date` <- gsub("[.]","-", data$`Sampling Date`)
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
@@ -212,11 +229,11 @@ clean_the_data <- function(data, file) {
   }
 
 ### For V4_WBR
-  
   ### Specific to V4_AND, ALSO ASSUMING cm == cms
   if (str_detect(file, "AND")) {
     #units[[1,2]] <- "cms"
-    data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT") 
+    data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT")
+    data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
   
   ### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
@@ -229,11 +246,25 @@ clean_the_data <- function(data, file) {
   
   ### Specific to HBF
   if (str_detect(file, "HBF")) {
-    data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT") 
+    data <- unique(data)
+    data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT")
+    data$`Sampling Date` <- as.character(data$`Sampling Date`)
+    data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
+                                            orders = c("m/d/y","y-m-d"),
+                                            tz="GMT", locale = Sys.getlocale("LC_TIME"))
+    data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y")
+    
+    
+    #data$`Sampling Date` <- parse_date_time(x = data$`Sampling Date`, orders = c("m/d/y","y-m-d"),
+    #                tz="UTC", locale = Sys.getlocale("LC_TIME"))
+    
+    #data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
+    #data$`Sampling Date` <- parse_date_time(data$`Sampling Date`,orders = c("m/d/y", "y-d-m"))  
+    #strftime(data$`Sampling Date`, format = c("m/d/y", "y-d-m"))
+    #data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
-  
 
-  ### Specific to LMP
+### Specific to LMP
   if (str_detect(file, "LMP")) {
     names(data)[13] <- "DO mg/L"
   }
@@ -402,11 +433,11 @@ fill_units_data <- function(site_template, conversion, units_data) {
 #### MAIN ####
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
-template_downloader(templates_on_drive, template_folder)
+#template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
 #xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_Fin", full.names = TRUE)
+xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_HBF", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -415,9 +446,9 @@ for (i in 1:length(xls_templates)) {
   
   # ---------- Step 1. READ THE DATA ---------- #
  
-  #site_template<-file.path(template_folder, "Site_Data_Template_V4_KBS2")
+  #site_template<-file.path(template_folder, "Site_Data_Template_V4_HBF")
   site_data <- read_the_data(site_template)
-
+  
   # ---------- Step 2. CLEAN THE DATA ---------- #
   clean_data <- clean_the_data(site_data, site_template)
     
@@ -429,6 +460,8 @@ for (i in 1:length(xls_templates)) {
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
+  
+}
 
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
@@ -438,7 +471,7 @@ for (i in 1:length(xls_templates)) {
 
    # ---------- Step 7. FILL UNITS DATA FRAME ------- #
    full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-}
+# }
 
 ## Write csv for all units dataframe outside of loop
 write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
@@ -454,5 +487,26 @@ write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1
 #   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
 
 
+vector1 <- c("05/05/18",
+            "06/23/18","05-06-2018", 
+            "08-25-2018") 
+vector1 
 
+vector1 <- parse_date_time(x = vector1,
+                orders = c("m/d/y","y-m-d"),
+                tz="GMT", locale = Sys.getlocale("LC_TIME")
+                )
+vector1 <- strftime(vector1, format = "%m/%d/%Y")
 
+###
+data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
+                                        orders = c("m/d/y","y-m-d"),
+                                        tz="GMT", locale = Sys.getlocale("LC_TIME"))
+data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y")
+
+###
+vector1
+
+vector1 <- as.Date(vector1, format = "%m/%d/%Y")
+vector1 <- dmy(vector1)
+vector1 
