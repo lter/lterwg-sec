@@ -144,7 +144,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric","numeric", "numeric", "numeric"))
     
-    # date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
+# date in this template is set to Text. Otherwise, conversion turns dates into numerals. 
     
   }
   
@@ -179,7 +179,9 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric","numeric", "numeric","numeric"))
-    # half date column defined differently from other half. We read the original dataset twice to extract both vectors that have different type. 
+    
+    # half of the Sampling Date column defined differently from other half. We read the original dataset twice to extract both vectors that have different type. 
+    
     # 1. Date values read when whole column is defined as type "date" 
     date.format1 <- read_data$`Sampling Date`[0:2889]
     date.format1 <- ymd(date.format1)
@@ -201,6 +203,8 @@ read_the_data <- function(xls_file) {
     date.format2 <- read_data$`Sampling Date`[2890:7423]
     date.format2 <- ydm(date.format2)
     date.format2 <- strftime(date.format2, format = "%m/%d/%Y")
+    
+      # Check how we can avoid explicitly stating the column range so that this part can be adaptable. 
     
     # combined columns
     date.format <-c(date.format1, date.format2)
@@ -242,28 +246,30 @@ clean_the_data <- function(data, file) {
   
 # Check if Sampling Date, Time are in standard format and other changes
 
-    #### For V4_Fin
+#### Specific to V4_Fin
   if (str_detect(file, "Fin")){ # class(data$`Sampling Date`)[1] != "POSIXct"
     data$`Sampling Date` <- gsub("[.]","-", data$`Sampling Date`)
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
-  if (str_detect(file, "Fin")){
+ 
+   if (str_detect(file, "Fin")){
     data$DOC<-data$TOC*0.95
     data$TDN<-data$TN*0.95
     data$DON<-(data$TDN-(data$NH4+data$NO3))
   }
 
 ### For V4_WBR
-  ### Specific to V4_AND, ALSO ASSUMING cm == cms
+  
+### Specific to V4_AND, ALSO ASSUMING cm == cms
   if (str_detect(file, "AND")) {
     #units[[1,2]] <- "cms"
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT")
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
   
-  ### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
+### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
   
-  ### Specific to ARC_PAR, ASSUMING Alkalinity mg/L == mg HCO3/L
+### Specific to ARC_PAR, ASSUMING Alkalinity mg/L == mg HCO3/L
   if (str_detect(file, "ARC_PAR")) {
     data$`Site/Stream Name` <- str_split(data$`Site/Stream Name`, " ", simplify = TRUE)[,1]
     #units[[2,2]] <- "mg HCO3/L"
@@ -298,7 +304,7 @@ clean_the_data <- function(data, file) {
     names(data)[13] <- "DO mg/L"
   }
   
-  ### Specific to LUQ
+### Specific to LUQ
   if(str_detect(file, "LUQ")) {
     lengths <- str_length(data$Time)
     values <- grep(3, lengths)
@@ -312,8 +318,18 @@ clean_the_data <- function(data, file) {
     names(data)[13] <- "DO mg/L"
     names(data)[11] <- "Temp C"
   }
-  
-  ### Specific to NIW
+
+### Specific to LIN
+  if (str_detect(file, "LIN")){
+    data$DON<-(data$TDN-(data$NH4+data$NO3))
+  }
+
+### Specific to TIM
+  if (str_detect(file, "TIM")){
+    data$DON<-(data$TDN-(data$NH4+data$NO3))
+  }
+    
+### Specific to NIW
   if(str_detect(file, "NIW")) {
     data$`Sampling Date` <- ymd(data$`Sampling Date`)
     data$Time <- as.character(data$Time)
@@ -465,8 +481,8 @@ fill_units_data <- function(site_template, conversion, units_data) {
 #template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
-#xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_HBF", full.names = TRUE)
+xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_TIMB", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
