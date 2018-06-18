@@ -76,7 +76,7 @@ read_the_data <- function(xls_file) {
   # Read the data in & check values
   read_data <- read_excel(xls_file, sheet = "Raw Data", na = "NA")
   
-  # Three templates are slightly different
+  # Some templates are slightly different
   
   if (str_detect(xls_file, "NIW")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data", 
@@ -92,6 +92,7 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric", 
                                           "numeric", "numeric", "numeric",
                                           "numeric", "numeric", "blank"))
+    
     
   }
   if (str_detect(xls_file, "UK")) {
@@ -147,7 +148,6 @@ read_the_data <- function(xls_file) {
     
   }
   
-
    if (str_detect(xls_file, "Fin")) {
     read_data <- read_excel(xls_file, sheet = "Raw Data",
                          col_types = c("text", "text", "text", "text", "text",
@@ -179,8 +179,33 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric","numeric", "numeric","numeric"))
-    #To convert TDN and DON values
+    # half date column defined differently from other half. We read the original dataset twice to extract both vectors that have different type. 
+    # 1. Date values read when whole column is defined as type "date" 
+    date.format1 <- read_data$`Sampling Date`[0:2889]
+    date.format1 <- ymd(date.format1)
+    date.format1 <- strftime(date.format1, format = "%m/%d/%Y")
+  
+    read_data <- read_excel(xls_file, sheet = "Raw Data",
+                            col_types = c("text", "text", "text", "date", "text",
+                                          "text", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric", "numeric",
+                                          "numeric", "numeric", "numeric", "numeric",
+                                          "numeric", "numeric","numeric", "numeric","numeric"))
+    # 2. Date values read when whole column is defined as type "date" 
+    date.format2 <- read_data$`Sampling Date`[2890:7423]
+    date.format2 <- ydm(date.format2)
+    date.format2 <- strftime(date.format2, format = "%m/%d/%Y")
     
+    # combined columns
+    date.format <-c(date.format1, date.format2)
+    read_data$`Sampling Date` <- date.format
+   
   }
  
 # #merges tabs for UK dataset (wait on this. Dataset requires some cleaning before getting into a template).
@@ -246,13 +271,17 @@ clean_the_data <- function(data, file) {
   
   ### Specific to HBF
   if (str_detect(file, "HBF")) {
-    data <- unique(data)
+    data <- unique(data)     # to remove duplicates rows 
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT")
-    data$`Sampling Date` <- as.character(data$`Sampling Date`)
-    data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
-                                            orders = c("m/d/y","y-m-d"),
-                                            tz="GMT", locale = Sys.getlocale("LC_TIME"))
-    data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y")
+    data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
+    
+    # data$`Sampling Date` <- as.character(data$`Sampling Date`[0:2889])
+    # data$`Sampling Date` <- as.Date(data$`Sampling Date`[2889:.])
+    # data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
+    #                                          orders = c("m/d/y","y-m-d"),
+    #                                          tz="GMT", locale = Sys.getlocale("LC_TIME"))  # put in GMT format
+    # data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y") #put into m/d/y format
+ 
     
     
     #data$`Sampling Date` <- parse_date_time(x = data$`Sampling Date`, orders = c("m/d/y","y-m-d"),
@@ -487,26 +516,31 @@ write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1
 #   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
 
 
-vector1 <- c("05/05/18",
-            "06/23/18","05-06-2018", 
-            "08-25-2018") 
-vector1 
 
-vector1 <- parse_date_time(x = vector1,
-                orders = c("m/d/y","y-m-d"),
-                tz="GMT", locale = Sys.getlocale("LC_TIME")
-                )
-vector1 <- strftime(vector1, format = "%m/%d/%Y")
-
-###
-data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
-                                        orders = c("m/d/y","y-m-d"),
-                                        tz="GMT", locale = Sys.getlocale("LC_TIME"))
-data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y")
-
-###
-vector1
-
-vector1 <- as.Date(vector1, format = "%m/%d/%Y")
-vector1 <- dmy(vector1)
-vector1 
+#### TESTER #####
+# vector1 <- c("05/05/18",
+#             "06/23/18","05-06-2018",
+#             "08-25-2018")
+# vector1
+# 
+# vector1 <- parse_date_time(x = vector1,
+#                 orders = c("m/d/y","y-m-d"),
+#                 tz="GMT", locale = Sys.getlocale("LC_TIME")
+#                 )
+# vector1 <- strftime(vector1, format = "%m/%d/%Y")
+# # 
+# # ###
+# # data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
+# #                                         orders = c("m/d/y","y-m-d"),
+# #                                         tz="GMT", locale = Sys.getlocale("LC_TIME"))
+# # data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y")
+# # 
+# # ###
+# # vector1
+# # 
+# # vector1 <- as.Date(vector1, format = "%m/%d/%Y")
+# # vector1 <- dmy(vector1)
+# # vector1 
+# 
+# site_data1<-sample_n(site_data, 10)
+# site_data1
