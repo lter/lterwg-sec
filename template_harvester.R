@@ -183,7 +183,10 @@ read_the_data <- function(xls_file) {
     # half of the Sampling Date column defined differently from other half. We read the original dataset twice to extract both vectors that have different type. 
     
     # 1. Date values read when whole column is defined as type "date" 
-    date.format1 <- read_data$`Sampling Date`[0:2889]
+    
+    date.format1 <- read_data$`Sampling Date`[grepl(pattern = "-", x = read_data$`Sampling Date`)]    
+      #date.format1 <- read_data$`Sampling Date`[0:2889] 
+      #date.format1 <- na.omit(read_data$`Sampling Date`)
     date.format1 <- ymd(date.format1)
     date.format1 <- strftime(date.format1, format = "%m/%d/%Y")
   
@@ -200,13 +203,12 @@ read_the_data <- function(xls_file) {
                                           "numeric", "numeric", "numeric", "numeric",
                                           "numeric", "numeric","numeric", "numeric","numeric"))
     # 2. Date values read when whole column is defined as type "date" 
-    date.format2 <- read_data$`Sampling Date`[2890:7423]
+    
+    date.format2 <- read_data$`Sampling Date`[grepl(pattern = "-", x = read_data$`Sampling Date`)] 
     date.format2 <- ydm(date.format2)
     date.format2 <- strftime(date.format2, format = "%m/%d/%Y")
     
-      # Check how we can avoid explicitly stating the column range so that this part can be adaptable. 
-    
-    # combined columns
+    # combining columns and putting back under `Sampling Date` column
     date.format <-c(date.format1, date.format2)
     read_data$`Sampling Date` <- date.format
    
@@ -299,6 +301,18 @@ clean_the_data <- function(data, file) {
     #data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
 
+  
+###Specific to KNZ
+  if(str_detect(file, "KNZ")){
+    data$DOC <-as.numeric(as.character(data$DOC))
+    data$TN <-as.numeric(as.character(data$TN))
+    data$NO3 <-as.numeric(as.character(data$NO3))
+    data$NH4 <-as.numeric(as.character(data$NH4))
+    data$SRP <-as.numeric(as.character(data$SRP))
+    data$TP <-as.numeric(as.character(data$TP))
+  }
+  
+  
 ### Specific to LMP
   if (str_detect(file, "LMP")) {
     names(data)[13] <- "DO mg/L"
@@ -482,7 +496,7 @@ fill_units_data <- function(site_template, conversion, units_data) {
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_TIMB", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_HBF", full.names = TRUE)
 xls_templates
 
 for (i in 1:length(xls_templates)) {
@@ -506,7 +520,7 @@ for (i in 1:length(xls_templates)) {
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
   
-}
+# }
 
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
@@ -516,11 +530,10 @@ for (i in 1:length(xls_templates)) {
 
    # ---------- Step 7. FILL UNITS DATA FRAME ------- #
    full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
-# }
+}
 
 ## Write csv for all units dataframe outside of loop
 write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1", quote = TRUE)
-
 
 ###test code for step 6. Removed full_units_data from function.
 # ## Only needed when building the units summary
@@ -532,31 +545,3 @@ write.csv(full_units_data, units_path, row.names = FALSE, fileEncoding = "Latin1
 #   full_units_data <- fill_units_data(site_template, conversion_file, full_units_data)
 
 
-
-#### TESTER #####
-# vector1 <- c("05/05/18",
-#             "06/23/18","05-06-2018",
-#             "08-25-2018")
-# vector1
-# 
-# vector1 <- parse_date_time(x = vector1,
-#                 orders = c("m/d/y","y-m-d"),
-#                 tz="GMT", locale = Sys.getlocale("LC_TIME")
-#                 )
-# vector1 <- strftime(vector1, format = "%m/%d/%Y")
-# # 
-# # ###
-# # data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
-# #                                         orders = c("m/d/y","y-m-d"),
-# #                                         tz="GMT", locale = Sys.getlocale("LC_TIME"))
-# # data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y")
-# # 
-# # ###
-# # vector1
-# # 
-# # vector1 <- as.Date(vector1, format = "%m/%d/%Y")
-# # vector1 <- dmy(vector1)
-# # vector1 
-# 
-# site_data1<-sample_n(site_data, 10)
-# site_data1
