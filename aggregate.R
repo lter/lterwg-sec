@@ -6,11 +6,8 @@
 ### Authors: Celine Mol, Margaux Sleckman, and Julien Brun, NCEAS, UCSB
 ### Email: SciComp@nceas.ucsb.edu
 
-
 #### LIBRARIES ####
-
 library(tidyverse)
-
 
 #### CONSTANTS ####
 
@@ -79,7 +76,8 @@ aggregator <- function(csv_list) {
                                               TSS = col_double(),
                                               PP = col_double(),
                                               PON = col_double()))
-    # Handle the first file case
+ 
+# Handle the first file case
     if (i > 1) {
       if (ncol(current_file) <= 39) { # remove extra columns like location
         all_csvs <-  rbind(all_csvs, current_file)
@@ -92,7 +90,7 @@ aggregator <- function(csv_list) {
     }
   }
   
-  # Set fields names
+# Set fields names
   colnames(all_csvs) <- c("LTER", "Site_Stream_Name", "Sampling_Date", "Time",
                             "Land_Use", "Treatment", "Q_Discharge", "alkalinity",
                             "ANC", "pH", "Temp_C", "DIC", "DO_mg_L", "DO_percent", "Conductivity",
@@ -164,20 +162,45 @@ all_sites$Spec_Cond <- ifelse(all_sites$Spec_Cond >= 10, all_sites$Spec_Cond, NA
 all_sites$DOC <- ifelse(all_sites$DOC >= 0.1 & all_sites$DOC <= 150, all_sites$DOC, NA)
 
 # fix specific TDN range
-all_sites$TDN <- ifelse(all_sites$TDN >= 0.05 & all_sites$TDN <= 25, all_sites$TDN, NA)
+#original
+#all_sites$TDN <- ifelse(all_sites$TDN >= 0.05 & all_sites$TDN <= 25, all_sites$TDN, NA)
+#updated 
+all_sites$TDN <- ifelse(all_sites$TDN >= 0.05, all_sites$TDN,
+                        ifelse(all_sites$TDN < 0.05 & all_sites$TDN >= 0, 0.025,
+                          NA))
+
+# if(all_sites$TDN >= 0.05 & all_sites$TDN <= 25){
+#   all_sites$TDN
+#   } else if(all_sites$TDN < 0.05 & all_sites$TDN >= 0){
+#     0.025
+#   } else{
+#     NA
+# }
 
 # fix specific DON range
 all_sites$DON <- ifelse(all_sites$DON >= 0, all_sites$DON, NA)
 
 # fix specific NO3 range
-all_sites$NO3 <- ifelse(all_sites$NO3 >= 0.01 & all_sites$NO3 <= 17, all_sites$NO3, NA)
-
+#original
+#all_sites$NO3 <- ifelse(all_sites$NO3 >= 0.01 & all_sites$NO3 <= 17, all_sites$NO3, NA)
+#updated
+all_sites$NO3 <- ifelse(all_sites$NO3 >= 0.005, all_sites$NO3,
+                        ifelse(all_sites$NO3 < 0.005 & all_sites$NO3 >= 0, 0.0025,
+                               NA))
 # fix specific NH4 range
-all_sites$NH4 <- ifelse(all_sites$NH4 >= 0.05, all_sites$NH4, NA)
-
+#original
+#all_sites$NH4 <- ifelse(all_sites$NH4 >= 0.05, all_sites$NH4, NA)
+#updated
+all_sites$NH4 <- ifelse(all_sites$NH4 >= 0.004, all_sites$NH4,
+                        ifelse(all_sites$NH4 < 0.004 & all_sites$NH4 >= 0, 0.002,
+                               NA))
 # fix specific PO4P range
-all_sites$PO4 <- ifelse(all_sites$PO4 >= 0.02 & all_sites$PO4 <= 2, all_sites$PO4, NA)
-
+#original
+#all_sites$PO4 <- ifelse(all_sites$PO4 >= 0.02 & all_sites$PO4 <= 2, all_sites$PO4, NA)
+#updated
+all_sites$PO4 <- ifelse(all_sites$PO4 >= 0.005, all_sites$PO4,
+                        ifelse(all_sites$PO4 < 0.005 & all_sites$PO4 >= 0, 0.0025,
+                               NA))
 # fix specific SRP range
 all_sites$SRP <- ifelse(all_sites$SRP >= 0.02 & all_sites$SRP <= 2, all_sites$SRP, NA)
 
@@ -194,8 +217,15 @@ all_sites$DOP <- ifelse(all_sites$DOP >= 0.02 & all_sites$DOP <= 10, all_sites$D
 #all_sites$POC <- ifelse(all_sites$POC > 0.02 | all_sites$POC < 10, all_sites$POC, NA)
 
 # fix specific range
-for (measurement in c("Si", "Na", "Ca", "Mg", "SO4", "Cl")){ # "Fe", "Sr", "Al" 
-  all_sites[, measurement] <- ifelse(all_sites[, measurement][[1]] > 0.1, all_sites[, measurement][[1]], NA)
+#original
+# for (measurement in c("Si", "Na", "Ca", "Mg", "SO4", "Cl")){ # "Fe", "Sr", "Al" 
+#   all_sites[, measurement] <- ifelse(all_sites[, measurement][[1]] > 0.1, all_sites[, measurement][[1]], NA)
+# }
+#updated
+for (measurement in c("Si", "Na", "Ca", "Mg", "SO4", "Cl")){                    # "Fe", "Sr", "Al" 
+  all_sites[, measurement] <- ifelse(all_sites[, measurement][[1]] >= 0.1, all_sites[, measurement][[1]],
+                                     ifelse(all_sites[, measurement][[1]] < 0.01 & all_sites[, measurement][[1]]>=0, 0.05,
+                                            NA))
 }
 
 # fix specific K range
