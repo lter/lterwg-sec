@@ -187,7 +187,7 @@ read_the_data <- function(xls_file) {
     date.format1 <- read_data$`Sampling Date`[grepl(pattern = "-", x = read_data$`Sampling Date`)]    
       #date.format1 <- read_data$`Sampling Date`[0:2889] 
       #date.format1 <- na.omit(read_data$`Sampling Date`)
-    date.format1 <- ymd(date.format1)
+    date.format1 <- ydm(date.format1)
     date.format1 <- strftime(date.format1, format = "%m/%d/%Y")
   
     read_data <- read_excel(xls_file, sheet = "Raw Data",
@@ -282,26 +282,8 @@ clean_the_data <- function(data, file) {
     data <- unique(data)     # to remove duplicates rows 
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT")
     data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
-    
-    # data$`Sampling Date` <- as.character(data$`Sampling Date`[0:2889])
-    # data$`Sampling Date` <- as.Date(data$`Sampling Date`[2889:.])
-    # data$`Sampling Date` <- parse_date_time(x=`Sampling Date`,
-    #                                          orders = c("m/d/y","y-m-d"),
-    #                                          tz="GMT", locale = Sys.getlocale("LC_TIME"))  # put in GMT format
-    # data$`Sampling Date` <- strftime(data$`Sampling Date`, format = "%m/%d/%Y") #put into m/d/y format
- 
-    
-    
-    #data$`Sampling Date` <- parse_date_time(x = data$`Sampling Date`, orders = c("m/d/y","y-m-d"),
-    #                tz="UTC", locale = Sys.getlocale("LC_TIME"))
-    
-    #data$`Sampling Date` <- as.Date(data$`Sampling Date`, format = "%m/%d/%Y")
-    #data$`Sampling Date` <- parse_date_time(data$`Sampling Date`,orders = c("m/d/y", "y-d-m"))  
-    #strftime(data$`Sampling Date`, format = c("m/d/y", "y-d-m"))
-    #data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
 
-  
 ###Specific to KNZ
   if(str_detect(file, "KNZ")){
     data$DOC <-as.numeric(as.character(data$DOC))
