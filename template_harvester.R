@@ -211,7 +211,6 @@ read_the_data <- function(xls_file) {
     # combining columns and putting back under `Sampling Date` column
     date.format <-c(date.format1, date.format2)
     read_data$`Sampling Date` <- date.format
-   
   }
  
 # #merges tabs for UK dataset (wait on this. Dataset requires some cleaning before getting into a template).
@@ -254,7 +253,7 @@ clean_the_data <- function(data, file) {
     data$`Sampling Date` <- dmy(data$`Sampling Date`)
   }
  
-   if (str_detect(file, "Fin")){
+  if (str_detect(file, "Fin")){
     data$DOC<-data$TOC*0.95
     data$TDN<-data$TN*0.95
     data$DON<-(data$TDN-(data$NH4+data$NO3))
@@ -271,10 +270,16 @@ clean_the_data <- function(data, file) {
   
 ### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
   
+  if (str_detect(file, "ARC_GRO")){
+    data$DON <- (data$TDN-((data$NH4/1000)+(data$NO3/1000)))
+  }
+  
+  
 ### Specific to ARC_PAR, ASSUMING Alkalinity mg/L == mg HCO3/L
   if (str_detect(file, "ARC_PAR")) {
     data$`Site/Stream Name` <- str_split(data$`Site/Stream Name`, " ", simplify = TRUE)[,1]
     #units[[2,2]] <- "mg HCO3/L"
+    data$DON <- (data$TDN-(data$NH4+data$NO3/1000))
   }
   
   ### Specific to HBF
@@ -286,12 +291,12 @@ clean_the_data <- function(data, file) {
 
 ###Specific to KNZ
   if(str_detect(file, "KNZ")){
-    data$DOC <-as.numeric(as.character(data$DOC))
-    data$TN <-as.numeric(as.character(data$TN))
-    data$NO3 <-as.numeric(as.character(data$NO3))
-    data$NH4 <-as.numeric(as.character(data$NH4))
-    data$SRP <-as.numeric(as.character(data$SRP))
-    data$TP <-as.numeric(as.character(data$TP))
+    data$DOC <- as.numeric(as.character(data$DOC))
+    data$TN <- as.numeric(as.character(data$TN))
+    data$NO3 <- as.numeric(as.character(data$NO3))
+    data$NH4 <- as.numeric(as.character(data$NH4))
+    data$SRP <- as.numeric(as.character(data$SRP))
+    data$TP <- as.numeric(as.character(data$TP))
   }
   
   
@@ -317,12 +322,12 @@ clean_the_data <- function(data, file) {
 
 ### Specific to LIN
   if (str_detect(file, "LIN")){
-    data$DON<-(data$TDN-(data$NH4+data$NO3))
+    data$DON <- (data$TDN-(data$NH4+data$NO3))
   }
 
 ### Specific to TIM
   if (str_detect(file, "TIM")){
-    data$DON<-(data$TDN-(data$NH4+data$NO3))
+    data$DON <- (data$TDN-(data$NH4+data$NO3))
   }
     
 ### Specific to NIW
@@ -379,7 +384,6 @@ join_the_data <- function(conversions_file, file) {
   
   return(convert)
 }
-
 
 #' Make unit conversions on your cleaned data file
 #'
@@ -474,14 +478,14 @@ fill_units_data <- function(site_template, conversion, units_data) {
 #### MAIN ####
 # ---------- Step 0. DOWNLOAD THE TEMPLATES ---------- #
 
-#template_downloader(templates_on_drive, template_folder)
+template_downloader(templates_on_drive, template_folder)
 
 # List all the templates
 xls_templates <- list.files(path = template_folder, pattern = "^[A-Z]*Site*", full.names = TRUE)
-#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_HBF", full.names = TRUE)
+#xls_templates <- list.files(path = template_folder, pattern = "Site_Data_Template_V4_ARC_GRO", full.names = TRUE)
 xls_templates
 
-for (i in 1:length(xls_templates)) {
+for (i in 1:length(xls_templates)){
   site_template <- xls_templates[i]
   cat(sprintf("Processing template %s", basename(site_template)), "\n")
   
@@ -496,13 +500,10 @@ for (i in 1:length(xls_templates)) {
   # ---------- Step 3. BUILD THE UNIT CONVERSION TABLE ---------- #
   conversion_file <- join_the_data(LUT_file, site_template)
     
-  # ---------- Step 4. CONVERT THE DATA ---------- #
   converted <- convert_the_data(conversion_file, clean_data)
     
   # ---------- Step 5. Export as .csv file ------- #
   make_csv(converted, site_template, output_path)
-  
-# }
 
 #   ---------- Step 6. CREATE UNITS DATA FRAME -------- #
   if (i == 1){
