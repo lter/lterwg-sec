@@ -25,7 +25,7 @@ library(lubridate)
 # Assuming the top folder for the data is named "Templates_201802", 
 # similar as on the working group Goolgle Drive
 
-template_folder <- "Templates_201802" 
+template_folder <- paste0("Templates_", Sys.Date()) 
 # test if the directory exists
 dir.create(template_folder, showWarnings = FALSE)
 
