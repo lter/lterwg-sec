@@ -18,9 +18,6 @@ library(lubridate)
 
 #### CONSTANTS ####
 
-# define path if not using RStudio project relative to the repository
-# setwd("/Users/celine/Desktop") 
-
 # Set the relative path to directory containing the templates and LUT
 # Assuming the top folder for the data is named "Templates_201802", 
 # similar as on the working group Goolgle Drive
@@ -29,7 +26,7 @@ template_folder <- paste0("Templates_", Sys.Date())
 # test if the directory exists
 dir.create(template_folder, showWarnings = FALSE)
 
-# List the templates from the google Drive
+# List the templates from the google Drive https://drive.google.com/drive/u/0/folders/1HgU9ynNdUGD-YoTbk4hoK8KTV-uChoB8
 drive_folder <- "1HgU9ynNdUGD-YoTbk4hoK8KTV-uChoB8"
 templates_on_drive <- drive_ls(as_id(drive_folder), pattern = "xlsx")
 

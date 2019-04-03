@@ -17,7 +17,7 @@ library(tidyverse)
 # Template_harvester.R output
 
 # input files
-template_folder <- "Templates_201802" 
+template_folder <- "Templates_2019-04-02" 
 #template_folder<-"Templates_updated_26OCT2017"
 conversion_folder <- "csv_conversions"
 data_path <- file.path(template_folder, conversion_folder)
@@ -99,6 +99,8 @@ aggregator <- function(csv_list) {
 
   return(all_csvs)
 }
+
+
 
 #### MAIN ####
 
