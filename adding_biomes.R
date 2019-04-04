@@ -1,7 +1,7 @@
 
 
 library(tidyverse)
-library(sp)
+library(sf)
 library(plotbiomes) #https://github.com/valentinitnelav/plotbiomes
 
 # Read the WG data 
