@@ -2,16 +2,18 @@
 
 library(tidyverse)
 library(sp)
-library(plotbiomes)
+library(plotbiomes) #https://github.com/valentinitnelav/plotbiomes
 
-
+# Read the WG data 
 lter_data <- read_csv("Data/mean_site_all21.csv") %>%
   select(SiteUID,Temp,Precip)
 
+# convert units to match the one used in the package
 lter_data_fixed <- lter_data %>% 
   mutate(Temp=Temp/10) %>%
   mutate(Precip=Precip/10) # the sapce is in cm
 
+# create spatial objects
 lter_point <- st_as_sf(lter_data_fixed, coords = c("Temp", "Precip"))
 sp_biomes <- st_as_sf(Whittaker_biomes_poly)
 
@@ -32,7 +34,7 @@ whittaker_base_plot() +
              alpha  = 0.5) +
   theme_bw()
 
-#join back the data
+# join back the data
 lter_biomes <- left_join(lter_data, out, by="SiteUID") %>% select(-geometry)
 
 # write csv
