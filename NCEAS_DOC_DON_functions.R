@@ -178,6 +178,7 @@ C_N$MonthNum <- format(as.Date(C_N$Sampling_Date), "%m") #Month number so it's e
 # # LTER Abrv StartYear start.month EndYear End.Month Frequency
 # # LUQ   RI      2000           1    2015        12        12
 
+# Run for ALL
 all_sites_table <- pmap_dfr(lut, ~ main(lter_site=..1, stream_name=..2, start_year=..3, 
                        start_month=..4, end_year=..5, end_month=..6, frequ=..7))
 
