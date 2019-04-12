@@ -1,0 +1,115 @@
+---
+title: "LTER SEC - Sampling measurement sites"
+author: "Julien Brun, NCEAS"
+date: "4/12/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(digits=3)
+```
+
+## Sampling
+
+At this point, I have relied on  using random sample *without replacement* of the original data set using a Monte Carlo methog. More precisely I am relying on the rsample::`mc_cv` function of the `rsample` package (https://tidymodels.github.io/rsample/).
+
+I am then sampling the data from 0.1 to 0.95 (95% of the data is used) and repeating the sampling 1000 times (can be changed, but it seems to be enough). Here is the function I wrote to do the computation
+
+```{r function}
+#' function used to do the resampling of site 
+#' using random sample *without replacement* of the original data set 
+#'
+#' @param data_site a data frame to be sub-sampled
+#' @param threshold a number Fraction to use for the sampling
+#'
+#' @return
+#' @export
+#'
+#' @examples
+site_sampler <- function(data_site, threshold, repetitions = 1000) {
+  
+  # sample wit the data  random sample (without replacement)
+  resample1 <- rsample::mc_cv(data_site, prop = threshold, times = repetitions)
+  
+  # Take the selected data
+  sample_list <- setNames(purrr::map(resample1$splits, analysis), resample1$id)
+  
+  # Compute the mean
+  sample_sampled_mean <- purrr::map_df(sample_list,  function(x) mean(x$DOCDON, na.rm=TRUE)) %>%
+    tidyr::gather(key="sample_id", value="sample_mean")
+  
+  # add a column with the fraction used
+  cbind(sample_fraction = paste0("sample_",threshold*100), sample_sampled_mean)
+  
+}
+```
+
+## Reading the data
+
+Note I am not sure I have the latest version of the data. I have 327 sites with the ratio DOC/DON computed.
+
+```{r data, message=FALSE, warning=FALSE}
+
+suppressPackageStartupMessages(library(tidyverse))
+
+# Data on my local
+data_path <- "Data/mean_site_all21.csv"
+
+# read data
+site_data <- read_csv(data_path) %>%
+  select(SiteUID, Site_Stream_Name, DOCDON) %>%
+  drop_na(DOCDON)
+```
+
+## Resampling the data
+
+```{r resampling, warning=FALSE}
+
+library(rsample)
+
+thresholds <- seq(.1, .95, by=.05)
+
+# Compute all the prermutations
+all_samples <- map(thresholds, ~site_sampler(site_data, .x))
+
+# Make it a dataframe
+all_samples_df <- map_dfr(all_samples, rbind)
+
+```
+
+## Plotting the data
+
+The Blue line is the average DOC/DON ratio (mean = `r mean(site_data$DOCDON, na.rm=T)`)  for the entire data set 
+
+### Boxplot
+
+```{r boxplot}
+
+library(ggplot2)
+
+bp <-all_samples_df %>%
+  ggplot(aes(x = sample_fraction, y = sample_mean)) + 
+  geom_boxplot() + 
+  geom_hline(yintercept=mean(site_data$DOCDON, na.rm=T), color="blue") +
+  theme_bw() +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 90, hjust = 1)) 
+
+bp
+
+```
+
+### Scatter plot
+
+```{r scatter}
+
+scatp <-all_samples_df %>%
+  ggplot(aes(x = sample_fraction, y = sample_mean)) + 
+  geom_point() + 
+  geom_hline(yintercept=mean(site_data$DOCDON, na.rm=T), color="blue") +
+  theme_bw() + 
+  theme(legend.position = "top", axis.text.x = element_text(angle = 90, hjust = 1)) 
+  
+scatp
+
+```
