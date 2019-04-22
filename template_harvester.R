@@ -265,7 +265,7 @@ clean_the_data <- function(data, file) {
   if (str_detect(file, "AND")) {
     #units[[1,2]] <- "cms"
     data$Time <- strftime(data$Time, format = "%H:%M:%S", tz = "GMT")
-    data$`Sampling Date` <- dmy(data$`Sampling Date`)
+    data$`Sampling Date` <- ymd(data$`Sampling Date`)
   }
   
 ### Specific to ARC_GRO, ASSUMING Alkalinity mg/L == mg HCO3/L
